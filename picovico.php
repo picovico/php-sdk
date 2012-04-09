@@ -68,13 +68,28 @@ Picovico_Config::_init();
 define("PICOVICO_API_GET", "get");
 define("PICOVICO_API_POST", "post");
 
+// Failed Video
+define("PICOVICO_VIDEO_STATUS_FAILED", 0);
+// Queued Video
+define("PICOVICO_VIDEO_STATUS_QUEUED", 1);
+// Processing Video
+define("PICOVICO_VIDEO_STATUS_PROCESSING", 2);
+// Deferred Video
+define("PICOVICO_VIDEO_STATUS_DEFERRED", 3);
+// Rendering Video
+define("PICOVICO_VIDEO_STATUS_RENDERING", 4);
+// Complete Video
+define("PICOVICO_VIDEO_STATUS_COMPLETE", "-url-");
+
+
+
 
 /**
  * The Picovico way of handling Execptions
  *
  * @author acpmasquerade <acpmasquerade@picovico.com>
  */
-class Picovico_Api_Exception extends Exception {
+class Picovico_Exception extends Exception {
 
     /**
      * The result from the API server that represents the exception information.
@@ -82,7 +97,15 @@ class Picovico_Api_Exception extends Exception {
     protected $result;
 
     public function __construct($result) {
-        parent::__construct($msg, $code);
+        if(is_string($result)){
+            parent::__construct($result);
+        }elseif(is_numeric ($result)){
+            parent::__construct(NULL, $result);
+        }else{
+            // do something else
+
+            parent::__construct("Picovico_Exception");
+        }
     }
 
     /**
@@ -215,7 +238,7 @@ class Picovico {
         $result = curl_exec($curl_handler);
 
         if ($result === false) {
-            $e = new Picovico_Api_Exception(array(
+            $e = new Picovico_Exception(array(
                         'error_code' => curl_errno($curl_handler),
                         'error' => array(
                             'message' => curl_error($curl_handler),
@@ -287,7 +310,7 @@ class Picovico {
      *                      by a failed API call.
      */
     protected function throw_api_exception($result) {
-        $e = new Picovico_Api_Exception($result);        
+        $e = new Picovico_Exception($result);
         throw $e;
     }
 
@@ -423,19 +446,108 @@ class Picovico_Theme extends Picovico{
  * @author acpmasquerade <acpmasquerade@gmail.com>
  */
 class Picovico_Video extends Picovico{
+
+    private $status;
+    private $url;
+
+    private $locked = FALSE;
+
+    private $frames = array();
+
+    private $theme = null;    
+
+    protected static $status_explanations;
+
     function  __construct($config) {
         parent::__construct($config);
     }
 
     /**
-     * Fetches a publicly available video, created by user.
+     * Status as defined by Picovico API Documentation
+     *
+     * 0 Implying FAILED
+     * 1 Implying QUEUED
+     * 2 Implying PROCESSING
+     * 3 Implying DEFFERED
+     * 4 Implying RENDERING
      * 
-     * @param <string> $public_video_identifier - The unique identifier for any publicly available video
+     * @return <type> Status
+     */
+    public function get_status(){
+        return $this->status;
+    }
+
+    public function get_status_message(){
+        if(!isset (self::$status_explanations)){
+            self::$status_explanations = Picovico_Config::get("video_status");
+        }
+
+        return @self::$status_explanations[$this->status];
+    }
+
+    public function get_url(){
+        return $this->url;
+    }
+
+    public function get_youtube_url(){
+        // @todo
+    }
+
+    public function get_youtube_embed_code(){
+        // @todo
+    }
+
+    public function set_status($status){
+        $this->status = $status;
+    }
+
+    public function set_url($url){
+        $this->url = $url;
+    }
+
+    public function set_theme(Picovico_Theme $theme){
+        if(!is_object($theme) OR get_class($theme) != "Picovico_Theme"){
+            $this->throw_api_exception();
+        }else{
+            $this->theme = $theme;
+        }
+    }
+
+    public function get_theme(){
+        return $this->theme;
+    }
+
+
+    /**
+     * Fetches an available video, created by user / or available publicly
+     * 
+     * @param <string> $video_identifier - The unique identifier for any available video
      *
      * @return <Picovico_Video>
      */
-    function get_public_video($public_video_identifier){
+    function get_video($video_identifier){
+        $url = $this->get_api_url("get_video");
+        $response = $this->make_json_request($url, array("token"=>$video_identifier), PICOVICO_API_GET);
 
+        if(isset($response["status"])){
+            // video isn't ready
+            $picovico_video = new Picovico_Video(array());
+            $picovico_video->set_status($response["status"]);
+
+            return $picovico_video;
+
+        }elseif(isset($response["url"])){
+            // video is ready
+            $picovico_video = new Picovico_Video(array());
+            $picovico_video->set_status(PICOVICO_VIDEO_STATUS_COMPLETE);
+            $picovico_video->set_url($response["url"]);
+
+            return $picovico_video;
+            
+        }else{
+            // something UFO happened :(
+            $this->throw_api_exception();
+        }
     }
 
     /**
@@ -446,6 +558,54 @@ class Picovico_Video extends Picovico{
      * @return <array> array of Picovico_Video (s)
      */
     function get_my_videos($access_token = null){
+        // @todo
+    }
+
+    /**
+     * Adds a frame to video
+     * 
+     * @param <type> $type
+     * @param <type> $text
+     * @param <type> $url
+     * @param <type> $title
+     */
+    private function add_frame($type, $text = null, $url = null, $title = null){
+        
+    }
+
+    private function append_frame($type, $text = null, $url = null, $title = null){
+        return $this->add_frame($type, $text, $url, $title);
+    }
+
+    private function prepend_frame(){
+
+    }
+
+    function add_text_frame(){
+
+    }
+
+    function append_text_frame(){
+
+    }
+
+    function prepend_text_frame(){
+
+    }
+
+    function add_image_frame(){
+
+    }
+
+    function append_image_frame(){
+
+    }
+
+    function prepend_image_frame(){
+
+    }
+
+    function shuffle_frames(){
         
     }
 
