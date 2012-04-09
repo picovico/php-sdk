@@ -65,6 +65,9 @@ class Picovico_Config{
 // Initialize the configuration
 Picovico_Config::_init();
 
+define("PICOVICO_API_GET", "get");
+define("PICOVICO_API_POST", "post");
+
 
 /**
  * The Picovico way of handling Execptions
@@ -175,22 +178,40 @@ class Picovico {
      *
      * @param string $url The URL to make the request to
      * @param array $params The parameters to use for the GET/POST body
-     * @param CurlHandler $curl_handler Initialized curl handle
+     * @param string $method GET or POST
      *
      * @return string The response text
      */
-    protected function make_request($url, $params, $curl_handler=null) {
-        if (!$curl_handler) {
-            $curl_handler = curl_init();
-        }
+    protected function make_request($url, $params = array(), $method = PICOVICO_API_POST) {
 
+        $curl_handler = curl_init();
+        
         $options = self::$CURL_OPTIONS;
 
-        $options[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
-        
-        $options[CURLOPT_URL] = $url;
+        if(!$params){
+            $params = array();
+        }
+
+        // force the access token
+        $params["access_token"] = $this->get_access_token();
+
+        $curl_request_params_string = http_build_query($params, null, '&');
+
+        if($method == PICOVICO_API_POST){
+            $options[CURLOPT_POSTFIELDS] = $curl_request_params_string;
+            $options[CURLOPT_URL] = $url;
+        }else{
+            $curl_request_url_parts = parse_url($url."?");
+            if(isset($curl_request_url_parts["query"])){
+                $curl_request_url = $url . "&" . $curl_request_params_string;
+            }else{
+                $curl_request_url = $url . "?" . $curl_request_params_string;
+            }
+            $options[CURLOPT_URL] = $curl_request_url;
+        }
 
         curl_setopt_array($curl_handler, $options);
+        
         $result = curl_exec($curl_handler);
 
         if ($result === false) {
@@ -209,13 +230,24 @@ class Picovico {
     }
 
     /**
+     * Makes HTTP POST/GET request, and json_decodes the response
+     * @param <type> $url
+     * @param <type> $params
+     * @param <type> $method
+     */
+    protected function make_json_request($url, $params = array(), $method = PICOVICO_API_POST) {
+        $json_response = $this->make_request($url, $params, $method);
+        return json_decode($json_response, TRUE);
+    }
+
+    /**
      * Build the URL for api given parameters.
      *
      * @param $method String the method name.
      * @return string The URL for the given parameters
      */
     protected function get_api_url($method) {
-        return "http://api.picovico.com/".Picovico_Config::get_api_config($method);
+        return "https://api.picovico.com/".Picovico_Config::get_api_config($method);
     }
 
     /**
@@ -272,6 +304,20 @@ class Picovico {
     }
 
     /**
+     * Dumps a readable output for a variable
+     * 
+     * @param <type> $var variable to debug
+     */
+    public static function debug($var){
+        if (php_sapi_name() != 'cli') {
+            echo "<pre>";
+        }
+        print_r($var);
+        
+        die();
+    }
+
+    /**
      * Destroy the current session
      */
     public function destroy_session() {
@@ -286,16 +332,66 @@ class Picovico {
  * @author acpmasquerade <acpmasquerade@gmail.com>
  */
 class Picovico_Theme extends Picovico{
+
+    private $properties;
+    
     function  __construct($config) {
         parent::__construct($config);
+    }
+
+    function get_name(){
+        return $this->properties["name"];
+    }
+
+    function get_machine_name(){
+        return $this->properties["machine_name"];
+    }
+
+    function get_description(){
+        return $this->properties["description"];
+    }
+
+    function get_sample_url(){
+        return $this->properties["sample_url"];
+    }
+
+    function get_thumbnail(){
+        return $this->properties["thumbnail"];
+    }
+
+    private function set_properties($properties){
+        $this->properties = $properties;
+    }
+
+    function get_properties(){
+        return $this->properties;
+    }
+
+    /**
+     *
+     * @param <type> $response - JSON decoded response array from themes
+     */
+    function create_object_from_response($response){
+        $this->set_properties($response);
+        return $this;
     }
 
     /**
      * 
      * @return <array> Array of Picovico_Theme (s)
      */
-    function get_available_themes(){
-        
+    public function get_available_themes(){
+        $url = $this->get_api_url("get_themes");
+        $response = $this->make_json_request($url, array(), PICOVICO_API_GET);
+
+        $themes = $response["themes"];
+
+        $themes_objects_array = array();
+        foreach($themes as $t){
+            $themes_objects_array[] = $this->create_object_from_response($t);
+        }
+
+        return $themes_objects_array;
     }
 
     /**
@@ -303,10 +399,21 @@ class Picovico_Theme extends Picovico{
      * 
      * @param <string> $theme_machine_name - The machine name identifier for the theme
      *
-     * @return Picovico_Theme
+     * @return Picovico_Theme if available, otherwise returns NULL
      */
-    function get_theme($theme_machine_name){
-        
+    public function get_theme($theme_machine_name){
+        $url = $this->get_api_url("get_themes");
+        $response = $this->make_json_request($url, array(), PICOVICO_API_GET);
+
+        $themes = $response["themes"];
+
+        foreach($themes as $t){
+            if($t["machine_name"] == $theme_machine_name){
+                return $this->create_object_from_response($t);
+            }
+        }
+
+        return NULL;
     }
 }
 
@@ -351,5 +458,3 @@ class Picovico_Video extends Picovico{
 
     
 }
-
-
