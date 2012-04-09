@@ -81,6 +81,9 @@ define("PICOVICO_VIDEO_STATUS_RENDERING", 4);
 // Complete Video
 define("PICOVICO_VIDEO_STATUS_COMPLETE", "-url-");
 
+// Frames
+define("PICOVICO_FRAME_TYPE_TEXT", "text_frame");
+define("PICOVICO_FRAME_TYPE_IMAGE", "image_frame");
 
 
 
@@ -449,12 +452,12 @@ class Picovico_Video extends Picovico{
 
     private $status;
     private $url;
-
-    private $locked = FALSE;
-
+    private $title;
+    private $theme;
+    
     private $frames = array();
 
-    private $theme = null;    
+    private $locked = FALSE;
 
     protected static $status_explanations;
 
@@ -561,6 +564,21 @@ class Picovico_Video extends Picovico{
         // @todo
     }
 
+    private function create_frame_data($type, $text = null, $url = null, $title = null){
+        $frame_data = array();
+        $frame_data["frame"] = $type;
+
+        if($type == PICOVICO_FRAME_TYPE_IMAGE){
+            $frame_data["data"] = array("url"=>$url, "text"=>$text);
+        }elseif($type == PICOVICO_FRAME_TYPE_TEXT){
+            $frame_data["data"] = array("title"=>$title, "text"=>$text);
+        }else{
+            $this->throw_api_exception("Invalid Frame Type");
+        }
+
+        return $frame_data;
+    }
+
     /**
      * Adds a frame to video
      * 
@@ -570,49 +588,86 @@ class Picovico_Video extends Picovico{
      * @param <type> $title
      */
     private function add_frame($type, $text = null, $url = null, $title = null){
-        
+        $frame_data = $this->create_frame_data($type, $text, $url, $title);
+        $this->frames[] = $frame_data;
+        return true;
     }
 
-    private function append_frame($type, $text = null, $url = null, $title = null){
-        return $this->add_frame($type, $text, $url, $title);
+    private function prepend_frame($type, $text = null, $url = null, $title = null){
+        $frame_data = $this->create_frame_data($type, $text, $url, $title);
+        array_unshift($this->frames, $frame_data);
+        return true;
     }
 
-    private function prepend_frame(){
-
+    function add_text_frame($title, $text){
+        return $this->add_frame(PICOVICO_FRAME_TYPE_TEXT, $text, null, $title);
     }
 
-    function add_text_frame(){
-
-    }
-
-    function append_text_frame(){
-
+    function append_text_frame($title, $text){
+        return $this->add_text_frame($title, $text);
     }
 
     function prepend_text_frame(){
-
+        return $this->prepend_frame(PICOVICO_FRAME_TYPE_TEXT, $text, null, $title);
     }
 
-    function add_image_frame(){
-
+    function add_image_frame($url, $text){
+        return $this->add_frame(PICOVICO_FRAME_TYPE_IMAGE, $text, $url);
     }
 
-    function append_image_frame(){
-
+    function append_image_frame($url, $text){
+        return $this->add_image_frame($url, $text);
     }
 
-    function prepend_image_frame(){
-
+    function prepend_image_frame($url, $text){
+        return $this->prepend_frame(PICOVICO_FRAME_TYPE_IMAGE, $text, $url);
     }
 
     function shuffle_frames(){
-        
+        shuffle($this->frames);
+        return true;
+    }
+
+    function reverse_frames(){
+        array_reverse($this->frames);
+        return true;
+    }
+
+    function set_callback_url($callback_url){
+        $this->callback_url = $callback_url;
+    }
+
+    function get_callback_url(){
+        return $this->callback_url;
+    }
+
+    function set_music_url($music_url){
+        $this->music_url = $music_url;
+    }
+
+    function get_music_url(){
+        return $this->music_url;
+    }
+
+    function set_title($title){
+        $this->title = $title;
+    }
+
+    function get_title(){
+        return $this->title;
     }
 
     /**
      * Create video
      */
     function create_video(){
+        // @todo - necessary testings before submitting the request
+
+        // check theme
+
+        // count frames
+
+        
         
     }
 
