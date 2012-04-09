@@ -1,2 +1,16 @@
 PicoVico - PHP Client Libraries
+[Version]
+0.1alpha
 
+[API Documentation]
+http://developer.picovico.com/api.xhtml
+
+[Author]
+acpmasquerade@gmail.com
+
+[Last-Modified]
+9th April, 2012
+
+[access_token:authentication]
+access_token is available by request. Please contact developers@picovico.com to receive one for your app.
+access_token is used as authentication for your picovico apps.
