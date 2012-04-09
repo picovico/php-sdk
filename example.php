@@ -32,6 +32,9 @@ $theme = $pv->get_theme("coolvibes");
 $pv_video = new Picovico_Video($pv_config);
 
 $pv_video->set_theme($theme);
+$pv_video->set_callback_url("http://acpmasquerade.com/touch/picovico_callback.php?");
+// some Music URL
+// $pv_video->set_music_url();
 
 // add some random 10 text frames
 for($i = 0; $i < 10; $i++){
