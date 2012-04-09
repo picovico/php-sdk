@@ -133,9 +133,10 @@ class Picovico_Exception extends Exception {
     /**
      * @return string The string representation of the error
      */
-    public function __toString() {
-        return $error_string;
-    }
+//    public function __toString() {
+//        return $this->result;
+//        return $error_string;
+//    }
 
 }
 
@@ -558,6 +559,8 @@ class Picovico_Video extends Picovico{
             $picovico_video = new Picovico_Video(array());
             $picovico_video->set_status($response["status"]);
 
+            $picovico_video->set_token($video_identifier);
+
             return $picovico_video;
 
         }elseif(isset($response["url"])){
@@ -565,6 +568,8 @@ class Picovico_Video extends Picovico{
             $picovico_video = new Picovico_Video(array());
             $picovico_video->set_status(PICOVICO_VIDEO_STATUS_COMPLETE);
             $picovico_video->set_url($response["url"]);
+
+            $picovico_video->set_token($video_identifier);
 
             return $picovico_video;
             
@@ -685,6 +690,9 @@ class Picovico_Video extends Picovico{
         // @todo - necessary testings before submitting the request
 
         // check theme
+        if(!$this->get_theme()){
+            $this->throw_api_exception("Theme not selected");
+        }
 
         // count frames
 
