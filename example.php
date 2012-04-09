@@ -26,6 +26,8 @@ $pv = new Picovico_Theme($pv_config);
 //$themes = $pv->get_available_themes();
 //Picovico::debug($themes);
 
-$theme = $pv->get_theme("coolvibes");
-Picovico::debug($theme);
+//$theme = $pv->get_theme("coolvibes");
+//Picovico::debug($theme);
+
+// Create Video
 

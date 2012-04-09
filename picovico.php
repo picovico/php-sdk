@@ -454,6 +454,8 @@ class Picovico_Video extends Picovico{
     private $url;
     private $title;
     private $theme;
+
+    private $token = null;
     
     private $frames = array();
 
@@ -520,6 +522,25 @@ class Picovico_Video extends Picovico{
         return $this->theme;
     }
 
+    public function get_token(){
+        return $this->token;
+    }
+
+    private function set_token($token){
+        $this->token = $token;
+    }
+
+    function get_frames(){
+        return $this->frames;
+    }
+
+    public function get_locked(){
+        return $this->locked;
+    }
+
+    private function set_locked($locked){
+        $this->locked = $locked;
+    }
 
     /**
      * Fetches an available video, created by user / or available publicly
@@ -563,7 +584,7 @@ class Picovico_Video extends Picovico{
     function get_my_videos($access_token = null){
         // @todo
     }
-
+    
     private function create_frame_data($type, $text = null, $url = null, $title = null){
         $frame_data = array();
         $frame_data["frame"] = $type;
@@ -667,7 +688,23 @@ class Picovico_Video extends Picovico{
 
         // count frames
 
+        $picovico_video_definition_data = array();
+        $picovico_video_definition_data["music_url"] = $this->get_music_url();
+        $picovico_video_definition_data["video_title_16"] = $this->get_title();
+        $picovico_video_definition_data["theme"] = $this->get_theme()->get_machine_name();
+        $picovico_video_definition_data["frames"] = $this->get_frames();
+
+        $url = $this->get_api_url("create_video");
+        $response = $this->make_json_request($url, array("vdd"=>json_encode($picovico_video_definition_data)), PICOVICO_API_POST);
+
+        $this->set_locked(TRUE);
         
+        if(isset($response["token"])){
+            $this->set_token($response["token"]);
+            return $this->get_token();
+        }else{
+            $this->throw_api_exception("Error Creating Video");
+        }
         
     }
 
