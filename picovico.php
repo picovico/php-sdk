@@ -25,6 +25,48 @@
  */
 
 /**
+ * The Picovico configuration class
+ */
+class Picovico_Config{
+
+    private static $PV_config;
+    private static $PV_config_loaded;
+    
+    public static function _init(){
+        if(isset(self::$PV_config_loaded) AND self::$PV_config_loaded == TRUE){
+            // do nothing
+        }else{
+            // load the configuration from config file once, and cache it
+            $ini_config = parse_ini_file(__DIR__."/"."picovico.ini", TRUE);
+
+            self::$PV_config = $ini_config;
+            self::$PV_config_loaded = TRUE;
+        }
+    }
+
+    public static function get($var = null){
+        if(($var)){
+            return self::$PV_config[$var];
+        }else{
+            return self::$PV_config;
+        }
+    }
+
+    public static function get_api_config($var = null){
+        if(($var)){
+            return self::$PV_config["api"][$var];
+        }else{
+            return self::$PV_config["api"];
+        }
+    }
+
+}
+
+// Initialize the configuration
+Picovico_Config::_init();
+
+
+/**
  * The Picovico way of handling Execptions
  *
  * @author acpmasquerade <acpmasquerade@picovico.com>
@@ -129,15 +171,6 @@ class Picovico {
     }
 
     /**
-     * Make an API call.
-     *
-     * @return mixed The decoded response
-     */
-    public function api() {
-        
-    }
-
-    /**
      * Makes an HTTP request. The CURL way
      *
      * @param string $url The URL to make the request to
@@ -152,11 +185,8 @@ class Picovico {
         }
 
         $options = self::$CURL_OPTIONS;
-        if ($this->useFileUploadSupport()) {
-            $options[CURLOPT_POSTFIELDS] = $params;
-        } else {
-            $options[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
-        }
+
+        $options[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
         
         $options[CURLOPT_URL] = $url;
 
@@ -185,7 +215,7 @@ class Picovico {
      * @return string The URL for the given parameters
      */
     protected function get_api_url($method) {
-        return "";
+        return "http://api.picovico.com/".Picovico_Config::get_api_config($method);
     }
 
     /**
@@ -245,7 +275,7 @@ class Picovico {
      * Destroy the current session
      */
     public function destroy_session() {
-        $this->setaccess_token(null);
+        $this->set_access_token(null);
     }
 }
 
