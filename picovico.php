@@ -13,16 +13,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-/**
-  if (!function_exists('curl_init')) {
-  throw new Exception('Picovico needs the CURL PHP extension.');
-  }
 
-  if (!function_exists('json_decode')) {
-  throw new Exception('Picovico needs the JSON PHP extension.');
-  }
- *
- */
+if (!function_exists('curl_init')) {
+    throw new Exception('Picovico needs the CURL PHP extension.');
+}
+
+if (!function_exists('json_decode')) {
+    throw new Exception('Picovico needs the JSON PHP extension.');
+}
 
 /**
  * The Picovico configuration class
@@ -73,7 +71,10 @@ class Picovico_Config{
             $pv_config_api["create_video"] = "create/";
 
             $pv_config = array();
+
             $pv_config["api"] = $pv_config_api;
+            $pv_config["api_base"] = "https://api.picovico.com/";
+            
             $pv_config["video_status"] = $pv_config_video_status;
 
             /** Do not change */
@@ -97,12 +98,15 @@ class Picovico_Config{
             return self::$PV_config["api"];
         }
     }
+    
+    public static function get_api_base(){
+        return self::$PV_config["api_base"];
+    }
 
 }
 
 // Initialize the configuration
 Picovico_Config::_init();
-
 
 /**
  * The Picovico way of handling Execptions
@@ -115,17 +119,23 @@ class Picovico_Exception extends Exception {
      * The result from the API server that represents the exception information.
      */
     protected $result;
+    protected $type; 
 
     public function __construct($result) {
+
+        $this->type = $result;
+        
         if(is_string($result)){
             parent::__construct($result);
         }elseif(is_numeric ($result)){
             parent::__construct(NULL, $result);
         }else{
             // do something else
-
-            parent::__construct("Picovico_Exception");
+            $this->type = "Picovico_Exception";
+            parent::__construct($this->type);
         }
+
+        $this->result = $result;
     }
 
     /**
@@ -144,16 +154,19 @@ class Picovico_Exception extends Exception {
      * @return string
      */
     public function getType() {
-        return 'UFO_Exception';
+        if(!isset($this->type) OR !($this->type)){
+            return 'UFO_Exception';
+        }else{
+            return $this->type;
+        }
     }
 
     /**
      * @return string The string representation of the error
      */
-//    public function __toString() {
-//        return $this->result;
-//        return $error_string;
-//    }
+    public function __toString() {
+        return "".$this->type;
+    }
 
 }
 
@@ -198,7 +211,7 @@ class Picovico {
     }
 
     /**
-     * Sets the access token for api calls.
+     * Sets the access token for API calls.
      *
      * @param string $access_token an access token.
      * @return Picovico
@@ -291,7 +304,7 @@ class Picovico {
      * @return string The URL for the given parameters
      */
     protected function get_api_url($method) {
-        return "https://api.picovico.com/".Picovico_Config::get_api_config($method);
+        return Picovico_Config::get_api_base().Picovico_Config::get_api_config($method);
     }
 
     /**
@@ -373,7 +386,7 @@ class Picovico {
 /**
  * Picovico Themes API wrapper
  *
- * @author acpmasquerade <acpmasquerade@gmail.com>
+ * @author acpmasquerade <acpmasquerade@picovico.com>
  */
 class Picovico_Theme extends Picovico{
 
@@ -383,37 +396,59 @@ class Picovico_Theme extends Picovico{
         parent::__construct($config);
     }
 
+    /**
+     * @return <string> Human Readable name of the theme
+     */
     function get_name(){
         return $this->properties["name"];
     }
 
+    /**
+     * @return <string> Machine Identifier name of the theme
+     */
     function get_machine_name(){
         return $this->properties["machine_name"];
     }
 
+    /**
+     * @return <string> The theme description
+     */
     function get_description(){
         return $this->properties["description"];
     }
 
+    /**
+     * @return <string> Video URL for a sample video created using the theme
+     */
     function get_sample_url(){
         return $this->properties["sample_url"];
     }
 
+    /**
+     * @return <string> Theme thumbnail
+     */
     function get_thumbnail(){
         return $this->properties["thumbnail"];
     }
 
+    /**
+     * @param <array> Set the theme properties. 
+     */
     private function set_properties($properties){
         $this->properties = $properties;
     }
 
+    /**
+     *
+     * @return <array> The theme properties as defined by Picovico
+     */
     function get_properties(){
         return $this->properties;
     }
 
     /**
      *
-     * @param <type> $response - JSON decoded response array from themes
+     * @param <Picovico_Theme> $response - JSON decoded response array from themes
      */
     function create_object_from_response($response){
         $this->set_properties($response);
@@ -459,12 +494,30 @@ class Picovico_Theme extends Picovico{
 
         return NULL;
     }
+
+    /**
+     * For any available Picovico_Theme machine_name, creats a dummy object
+     * This is helpful when the application doesn't want to do the actual fetching,
+     * and has some way to cache the list of available videos. 
+     * 
+     * @param <string> $theme_machine_name - One of the available machine names
+     * @return <Picovico_Theme> - A dummy theme with only the machine_name set 
+     */
+    public static function new_dummy_theme($theme_machine_name){
+        $dummy_theme = new Picovico_Theme();
+        $dummy_theme_properties = array();
+        $dummy_theme_properties["machine_name"] = $theme_machine_name;
+
+        $dummy_theme->set_properties($dummy_theme_properties);
+
+        return $dummy_theme;
+    }
 }
 
 /**
  * Picovico Videos API wrapper
  *
- * @author acpmasquerade <acpmasquerade@gmail.com>
+ * @author acpmasquerade <acpmasquerade@picovico.com>
  */
 class Picovico_Video extends Picovico{
 
@@ -510,14 +563,6 @@ class Picovico_Video extends Picovico{
 
     public function get_url(){
         return $this->url;
-    }
-
-    public function get_youtube_url(){
-        // @todo
-    }
-
-    public function get_youtube_embed_code(){
-        // @todo
     }
 
     public function set_status($status){
