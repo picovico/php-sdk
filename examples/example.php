@@ -38,6 +38,17 @@ class Picovico_Example{
         if(!isset($_SESSION["video_tokens"])){
             $_SESSION["video_tokens"] = array();
         }
+
+        // merge into the session, if any previous video tokens
+        if($config["video_tokens"]){
+            $video_tokens = $config["video_tokens"];
+            $session_tokens = $_SESSION["video_tokens"];
+
+            $all_video_tokens = array_unique(array_merge($video_tokens, $session_tokens));
+
+            $_SESSION["video_tokens"] = $all_video_tokens;
+        }
+        
     }
 
     function themes(){
@@ -220,23 +231,31 @@ class Picovico_Example{
         $token = $_GET["video"];
         
         if($token){
-            $video = $this->picovico_video->get_video($token);
 
-            $content .= "<hr />
+            try{
+                $video = $this->picovico_video->get_video($token);
+
+                $content .= "<hr />
                 Status - <strong>". $video->get_status_message() . "</strong>"
                 ."
                 ";
 
-            if($video->get_status() == Picovico_Config::VIDEO_STATUS_COMPLETE){
-                $content .= "
-                    <hr />
-                    Total Duration : "  .$video->get_duration() . "
-                    <br />
-                    <a href='".$video->get_url().">".$video->get_thumbnail()."<br />
-                        Check the Video
-                        </a>'
-                    ";
+                if($video->get_status() == Picovico_Config::VIDEO_STATUS_COMPLETE){
+                    $content .= "
+                        <hr />
+                        Total Duration : "  .$video->get_duration() . "
+                        <br />
+                        <a href='".$video->get_url().">".$video->get_thumbnail()."<br />
+                            Check the Video
+                            </a>'
+                        ";
+                }
             }
+            catch (Picovico_Exception $e){
+                $content .= " <hr />ERROR: <strong>{$e->getType()}</strong>";
+            }
+
+            
         }
 
 
