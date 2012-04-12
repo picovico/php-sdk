@@ -1,4 +1,4 @@
-PicoVico - PHP Client Libraries
+Picovico - PHP Client Libraries
 [Version]
 0.1alpha
 
@@ -13,4 +13,4 @@ acpmasquerade@picovico.com
 
 [access_token:authentication]
 access_token is available by request. Please contact developers@picovico.com to receive one for your app.
-access_token is used as authentication for your picovico apps.
+access_token is used as authentication for your Picovico apps.

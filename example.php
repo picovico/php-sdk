@@ -18,6 +18,19 @@
 
 require_once dirname(__FILE__)."/"."picovico.php";
 
+class Picovico_Example{
+
+    var $config = array();
+
+    var $picovico = null;
+
+    function  __construct() {
+        $this->config["access_token"] = "2|iOcYxmxvhS6aqBaKQvUCtX9kF3VWU5ju2D1xZnStPJU";
+        $this->picovico = new Picovico($this->config);
+    }
+    
+}
+
 $pv_config = array();
 $pv_config["access_token"] = "2|iOcYxmxvhS6aqBaKQvUCtX9kF3VWU5ju2D1xZnStPJU";
 
@@ -34,16 +47,22 @@ $pv_video = new Picovico_Video($pv_config);
 $pv_video->set_theme($theme);
 $pv_video->set_callback_url("http://acpmasquerade.com/touch/picovico_callback.php?");
 // some Music URL
-// $pv_video->set_music_url();
+//$pv_video->set_music_url("http://www.picovico.com/assets/music/classical/Laendler.mp3");
+$pv_video->set_music_url("http://wp.rdandy.com/wp-content/uploads/2011/01/04-Waka-Waka-Esto-es-Africa.mp3");
+
+// callback email
+$pv_video->set_callback_email("acpmasquerade@gmail.com");
 
 // add some random 10 text frames
-for($i = 0; $i < 10; $i++){
-    $pv_video->add_text_frame(uniqid(), "Text Frame");
-}
+$pv_video->add_text_frame(uniqid(), "@acpmasquerade");
+
+//for($i = 0; $i < 10; $i++){
+//    $pv_video->add_text_frame(uniqid(), "Text Frame");
+//}
 
 // add some image frames from the Recent Public list of Flickr
 // Source: http://www.flickr.com/services/api/explore/flickr.photos.getRecent
-$flickr_source = "http://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=93513456b90775bbf8198323d42fde83&format=json&nojsoncallback=1&per_page=10";
+$flickr_source = "http://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=93513456b90775bbf8198323d42fde83&format=json&nojsoncallback=1&per_page=25";
 $flickr_stream = json_decode(file_get_contents($flickr_source), TRUE);
 
 foreach($flickr_stream["photos"]["photo"] as $p){

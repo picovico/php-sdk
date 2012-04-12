@@ -36,10 +36,27 @@ class Picovico_Config{
         if(isset(self::$PV_config_loaded) AND self::$PV_config_loaded == TRUE){
             // do nothing
         }else{
-            // load the configuration from config file once, and cache it
-            $ini_config = parse_ini_file(__DIR__."/"."picovico.ini", TRUE);
 
-            self::$PV_config = $ini_config;
+            // mention the necessary configuration
+            $pv_config_video_status = array();
+            $pv_config_video_status["0"] = "FAILED to receive the requested video.";
+            $pv_config_video_status["1"] = "Requested video has been QUEUED for processing.";
+            $pv_config_video_status["2"] = "Requested video is currently under PROCESSING.";
+            $pv_config_video_status["3"] = "Requested video has been DEFERRED by Picovico.";
+            $pv_config_video_status["4"] = "Requested video is under RENDERING process.";
+
+            $pv_config_api = array();
+            $pv_config_api["get_themes"] = "themes/";
+            $pv_config_api["get_theme"] = "themes/";
+            $pv_config_api["get_video"] = "video/";
+            $pv_config_api["create_video"] = "create/";
+
+            $pv_config = array();
+            $pv_config["api"] = $pv_config_api;
+            $pv_config["video_status"] = $pv_config_video_status;
+
+            /** Do not change */
+            self::$PV_config = $pv_config;
             self::$PV_config_loaded = TRUE;
         }
     }
@@ -667,6 +684,14 @@ class Picovico_Video extends Picovico{
         return $this->callback_url;
     }
 
+    function set_callback_email($callback_email){
+        $this->callback_email = $callback_email;
+    }
+
+    function get_callback_email(){
+        return $this->callback_email;
+    }
+
     function set_music_url($music_url){
         $this->music_url = $music_url;
     }
@@ -694,6 +719,11 @@ class Picovico_Video extends Picovico{
             $this->throw_api_exception("Theme not selected");
         }
 
+        // music
+        if(!$this->get_music_url()){
+            $this->throw_api_exception("Music not selected");
+        }
+
         // count frames
 
         $picovico_video_definition_data = array();
@@ -701,6 +731,8 @@ class Picovico_Video extends Picovico{
         $picovico_video_definition_data["video_title_16"] = $this->get_title();
         $picovico_video_definition_data["theme"] = $this->get_theme()->get_machine_name();
         $picovico_video_definition_data["frames"] = $this->get_frames();
+        $picovico_video_definition_data["callback_url"] = $this->get_callback_url();
+        $picovico_video_definition_data["callback_email"] = $this->get_callback_email();
 
         $url = $this->get_api_url("create_video");
         $response = $this->make_json_request($url, array("vdd"=>json_encode($picovico_video_definition_data)), PICOVICO_API_POST);
