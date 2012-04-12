@@ -29,6 +29,27 @@
  */
 class Picovico_Config{
 
+    // HTTP GET/POST method
+    const API_GET = "get";
+    const API_POST = "post";
+
+    // Failed Video
+    const VIDEO_STATUS_FAILED = 0;
+    // Queued Video-
+    const VIDEO_STATUS_QUEUED = 1;
+    // Processing Video
+    const VIDEO_STATUS_PROCESSING = 2;
+    // Deferred Video
+    const VIDEO_STATUS_DEFERRED = 3;
+    // Rendering Video
+    const VIDEO_STATUS_RENDERING = 4;
+    // Complete Video
+    const VIDEO_STATUS_COMPLETE = 5;
+
+    // Frames
+    const FRAME_TYPE_TEXT = "text_frame";
+    const FRAME_TYPE_IMAGE = "image_frame";
+
     private static $PV_config;
     private static $PV_config_loaded;
     
@@ -81,27 +102,6 @@ class Picovico_Config{
 
 // Initialize the configuration
 Picovico_Config::_init();
-
-define("PICOVICO_API_GET", "get");
-define("PICOVICO_API_POST", "post");
-
-// Failed Video
-define("PICOVICO_VIDEO_STATUS_FAILED", 0);
-// Queued Video
-define("PICOVICO_VIDEO_STATUS_QUEUED", 1);
-// Processing Video
-define("PICOVICO_VIDEO_STATUS_PROCESSING", 2);
-// Deferred Video
-define("PICOVICO_VIDEO_STATUS_DEFERRED", 3);
-// Rendering Video
-define("PICOVICO_VIDEO_STATUS_RENDERING", 4);
-// Complete Video
-define("PICOVICO_VIDEO_STATUS_COMPLETE", "-url-");
-
-// Frames
-define("PICOVICO_FRAME_TYPE_TEXT", "text_frame");
-define("PICOVICO_FRAME_TYPE_IMAGE", "image_frame");
-
 
 
 /**
@@ -174,10 +174,10 @@ class Picovico {
      */
     public static $CURL_OPTIONS = array(
         CURLOPT_CONNECTTIMEOUT => 10,
-        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_RETURNTRANSFER => TRUE,
         CURLOPT_TIMEOUT => 60,
         CURLOPT_USERAGENT => 'Picovico-php-0.1alpha',
-        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYPEER => FALSE,
     );
     /**
      * The access_token
@@ -226,7 +226,7 @@ class Picovico {
      *
      * @return string The response text
      */
-    protected function make_request($url, $params = array(), $method = PICOVICO_API_POST) {
+    protected function make_request($url, $params = array(), $method = Picovico_Config::API_POST) {
 
         $curl_handler = curl_init();
         
@@ -241,7 +241,7 @@ class Picovico {
 
         $curl_request_params_string = http_build_query($params, null, '&');
 
-        if($method == PICOVICO_API_POST){
+        if($method == Picovico_Config::API_POST){
             $options[CURLOPT_POSTFIELDS] = $curl_request_params_string;
             $options[CURLOPT_URL] = $url;
         }else{
@@ -258,7 +258,7 @@ class Picovico {
         
         $result = curl_exec($curl_handler);
 
-        if ($result === false) {
+        if ($result === FALSE) {
             $e = new Picovico_Exception(array(
                         'error_code' => curl_errno($curl_handler),
                         'error' => array(
@@ -279,7 +279,7 @@ class Picovico {
      * @param <type> $params
      * @param <type> $method
      */
-    protected function make_json_request($url, $params = array(), $method = PICOVICO_API_POST) {
+    protected function make_json_request($url, $params = array(), $method = Picovico_Config::API_POST) {
         $json_response = $this->make_request($url, $params, $method);
         return json_decode($json_response, TRUE);
     }
@@ -426,7 +426,7 @@ class Picovico_Theme extends Picovico{
      */
     public function get_available_themes(){
         $url = $this->get_api_url("get_themes");
-        $response = $this->make_json_request($url, array(), PICOVICO_API_GET);
+        $response = $this->make_json_request($url, array(), Picovico_Config::API_GET);
 
         $themes = $response["themes"];
 
@@ -447,7 +447,7 @@ class Picovico_Theme extends Picovico{
      */
     public function get_theme($theme_machine_name){
         $url = $this->get_api_url("get_themes");
-        $response = $this->make_json_request($url, array(), PICOVICO_API_GET);
+        $response = $this->make_json_request($url, array(), Picovico_Config::API_GET);
 
         $themes = $response["themes"];
 
@@ -569,7 +569,7 @@ class Picovico_Video extends Picovico{
      */
     function get_video($video_identifier){
         $url = $this->get_api_url("get_video");
-        $response = $this->make_json_request($url, array("token"=>$video_identifier), PICOVICO_API_GET);
+        $response = $this->make_json_request($url, array("token"=>$video_identifier), Picovico_Config::API_GET);
 
         if(isset($response["status"])){
             // video isn't ready
@@ -583,7 +583,7 @@ class Picovico_Video extends Picovico{
         }elseif(isset($response["url"])){
             // video is ready
             $picovico_video = new Picovico_Video(array());
-            $picovico_video->set_status(PICOVICO_VIDEO_STATUS_COMPLETE);
+            $picovico_video->set_status(Picovico_Config::VIDEO_STATUS_COMPLETE);
             $picovico_video->set_url($response["url"]);
 
             $picovico_video->set_token($video_identifier);
@@ -611,9 +611,9 @@ class Picovico_Video extends Picovico{
         $frame_data = array();
         $frame_data["frame"] = $type;
 
-        if($type == PICOVICO_FRAME_TYPE_IMAGE){
+        if($type == Picovico_Config::FRAME_TYPE_IMAGE){
             $frame_data["data"] = array("url"=>$url, "text"=>$text);
-        }elseif($type == PICOVICO_FRAME_TYPE_TEXT){
+        }elseif($type == Picovico_Config::FRAME_TYPE_TEXT){
             $frame_data["data"] = array("title"=>$title, "text"=>$text);
         }else{
             $this->throw_api_exception("Invalid Frame Type");
@@ -633,17 +633,17 @@ class Picovico_Video extends Picovico{
     private function add_frame($type, $text = null, $url = null, $title = null){
         $frame_data = $this->create_frame_data($type, $text, $url, $title);
         $this->frames[] = $frame_data;
-        return true;
+        return TRUE;
     }
 
     private function prepend_frame($type, $text = null, $url = null, $title = null){
         $frame_data = $this->create_frame_data($type, $text, $url, $title);
         array_unshift($this->frames, $frame_data);
-        return true;
+        return TRUE;
     }
 
     function add_text_frame($title, $text){
-        return $this->add_frame(PICOVICO_FRAME_TYPE_TEXT, $text, null, $title);
+        return $this->add_frame(Picovico_Config::FRAME_TYPE_TEXT, $text, null, $title);
     }
 
     function append_text_frame($title, $text){
@@ -651,11 +651,11 @@ class Picovico_Video extends Picovico{
     }
 
     function prepend_text_frame(){
-        return $this->prepend_frame(PICOVICO_FRAME_TYPE_TEXT, $text, null, $title);
+        return $this->prepend_frame(Picovico_Config::FRAME_TYPE_TEXT, $text, null, $title);
     }
 
     function add_image_frame($url, $text){
-        return $this->add_frame(PICOVICO_FRAME_TYPE_IMAGE, $text, $url);
+        return $this->add_frame(Picovico_Config::FRAME_TYPE_IMAGE, $text, $url);
     }
 
     function append_image_frame($url, $text){
@@ -663,17 +663,17 @@ class Picovico_Video extends Picovico{
     }
 
     function prepend_image_frame($url, $text){
-        return $this->prepend_frame(PICOVICO_FRAME_TYPE_IMAGE, $text, $url);
+        return $this->prepend_frame(Picovico_Config::FRAME_TYPE_IMAGE, $text, $url);
     }
 
     function shuffle_frames(){
         shuffle($this->frames);
-        return true;
+        return TRUE;
     }
 
     function reverse_frames(){
         array_reverse($this->frames);
-        return true;
+        return TRUE;
     }
 
     function set_callback_url($callback_url){
@@ -735,7 +735,7 @@ class Picovico_Video extends Picovico{
         $picovico_video_definition_data["callback_email"] = $this->get_callback_email();
 
         $url = $this->get_api_url("create_video");
-        $response = $this->make_json_request($url, array("vdd"=>json_encode($picovico_video_definition_data)), PICOVICO_API_POST);
+        $response = $this->make_json_request($url, array("vdd"=>json_encode($picovico_video_definition_data)), Picovico_Config::API_POST);
 
         $this->set_locked(TRUE);
         
