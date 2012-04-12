@@ -31,6 +31,8 @@ class Picovico_Config{
     const API_GET = "get";
     const API_POST = "post";
 
+    // Incomplete Video - Not Uploaded yet (for API use only)
+    const VIDEO_STATUS_INCOMPLETE = -1;
     // Failed Video
     const VIDEO_STATUS_FAILED = 0;
     // Queued Video-
@@ -43,6 +45,11 @@ class Picovico_Config{
     const VIDEO_STATUS_RENDERING = 4;
     // Complete Video
     const VIDEO_STATUS_COMPLETE = 5;
+
+    // video sizes
+    const VIDEO_SIZE_90     = 90;
+    const VIDEO_SIZE_360    = 360;
+    const VIDEO_SIZE_480    = 480;    
 
     // Frames
     const FRAME_TYPE_TEXT = "text_frame";
@@ -58,6 +65,7 @@ class Picovico_Config{
 
             // mention the necessary configuration
             $pv_config_video_status = array();
+            $pv_config_video_status["1-"] = "Video is INCOMPLETE and has not been queued yet.";
             $pv_config_video_status["0"] = "FAILED to receive the requested video.";
             $pv_config_video_status["1"] = "Requested video has been QUEUED for processing.";
             $pv_config_video_status["2"] = "Requested video is currently under PROCESSING.";
@@ -467,7 +475,9 @@ class Picovico_Theme extends Picovico{
 
         $themes_objects_array = array();
         foreach($themes as $t){
-            $themes_objects_array[] = $this->create_object_from_response($t);
+            $pv_theme = new Picovico_Theme();
+            $pv_theme->create_object_from_response($t);
+            $themes_objects_array[] = $pv_theme;
         }
 
         return $themes_objects_array;
@@ -521,18 +531,18 @@ class Picovico_Theme extends Picovico{
  */
 class Picovico_Video extends Picovico{
 
-    private $status;
-    private $url;
-    private $title;
-    private $theme;
+    private $title  = null;
+    private $theme  = null;
+    private $token  = null;
 
-    private $token = null;
+    // the JSON properties as returned by Picovico
+    private $properties = array();
+
+    private $status = Picovico_Config::VIDEO_STATUS_INCOMPLETE;
     
     private $frames = array();
     private $frames_counter = 0;
     private $frames_identifers = array();
-
-    private $locked = FALSE;
 
     protected static $status_explanations;
 
@@ -563,16 +573,52 @@ class Picovico_Video extends Picovico{
         return @self::$status_explanations[$this->status];
     }
 
-    public function get_url(){
-        return $this->url;
+    public function set_properties($properties){
+        $this->properties = $properties;
+    }
+
+    public function get_properties(){
+        return $this->properties;
+    }
+
+    public function get_url($video_size = Picovico_Config::VIDEO_SIZE_360){
+        if($this->get_status() == Picovico_Config::VIDEO_STATUS_COMPLETE){
+            $video_url = @ $this->properties["video"][$video_size]["url"];
+            return $video_url;
+        }else{
+            $this->throw_api_exception("Incomplete_Video_Exception");
+        }
+    }
+
+    public function get_size($video_size = Picovico_Config::VIDEO_SIZE_360){
+        if($this->get_status() == Picovico_Config::VIDEO_STATUS_COMPLETE){
+            $video_size = @ $this->properties["video"][$video_size]["size"];
+            return $video_size;
+        }else{
+            $this->throw_api_exception("Incomplete_Video_Exception");
+        }
+    }
+
+    public function get_thumbnail($thumbnail_size = Picovico_Config::VIDEO_SIZE_360){
+        if($this->get_status() == Picovico_Config::VIDEO_STATUS_COMPLETE){
+            $thumbnail_url = @ $this->properties["thumbnail"][$thumbnail_size];
+            return $thumbnail_url;
+        }else{
+            $this->throw_api_exception("Incomplete_Video_Exception");
+        }
+    }
+
+    public function get_duration(){
+        if($this->get_status() == Picovico_Config::VIDEO_STATUS_COMPLETE){
+            $duration = @ $this->properties["duration"];
+            return $duration;
+        }else{
+            $this->throw_api_exception("Incomplete_Video_Exception");
+        }
     }
 
     public function set_status($status){
         $this->status = $status;
-    }
-
-    public function set_url($url){
-        $this->url = $url;
     }
 
     public function set_theme(Picovico_Theme $theme){
@@ -610,14 +656,6 @@ class Picovico_Video extends Picovico{
         return count($this->frames);
     }
 
-    public function get_locked(){
-        return $this->locked;
-    }
-
-    private function set_locked($locked){
-        $this->locked = $locked;
-    }
-
     /**
      * Fetches an available video, created by user / or available publicly
      * 
@@ -633,27 +671,25 @@ class Picovico_Video extends Picovico{
             // video isn't ready
             $picovico_video = new Picovico_Video(array());
             $picovico_video->set_status($response["status"]);
-
             $picovico_video->set_token($video_identifier);
-
             return $picovico_video;
         }
 
-        elseif(isset($response["url"])){
+        elseif(isset($response["video"])){
             // video is ready
             $picovico_video = new Picovico_Video(array());
             $picovico_video->set_status(Picovico_Config::VIDEO_STATUS_COMPLETE);
             $picovico_video->set_url($response["url"]);
-
             $picovico_video->set_token($video_identifier);
 
-            return $picovico_video;
+            $picovico_video->set_properties($response);
             
+            return $picovico_video;            
         }
 
         else{
             // something UFO happened :(
-            $this->throw_api_exception();
+            $this->throw_api_exception("API_Request_Exception");
         }
     }
 
@@ -799,6 +835,19 @@ class Picovico_Video extends Picovico{
         return $this->title;
     }
 
+    private function create_video_definition_data(){
+        $picovico_video_definition_data = array();
+
+        $picovico_video_definition_data["music_url"] = $this->get_music_url();
+        $picovico_video_definition_data["video_title_16"] = $this->get_title();
+        $picovico_video_definition_data["theme"] = $this->get_theme()->get_machine_name();
+        $picovico_video_definition_data["frames"] = $this->get_frames();
+        $picovico_video_definition_data["callback_url"] = $this->get_callback_url();
+        $picovico_video_definition_data["callback_email"] = $this->get_callback_email();
+
+        return $picovico_video_definition_data;
+    }
+
     /**
      * Create video
      */
@@ -816,23 +865,17 @@ class Picovico_Video extends Picovico{
 
         // count frames
 
-        $picovico_video_definition_data = array();
-        $picovico_video_definition_data["music_url"] = $this->get_music_url();
-        $picovico_video_definition_data["video_title_16"] = $this->get_title();
-        $picovico_video_definition_data["theme"] = $this->get_theme()->get_machine_name();
-        $picovico_video_definition_data["frames"] = $this->get_frames();
-        $picovico_video_definition_data["callback_url"] = $this->get_callback_url();
-        $picovico_video_definition_data["callback_email"] = $this->get_callback_email();
+        $picovico_video_definition_data = $this->create_video_definition_data();
 
         $url = $this->get_api_url("create_video");
         $response = $this->make_json_request($url, array("vdd"=>json_encode($picovico_video_definition_data)), Picovico_Config::API_POST);
 
-        $this->set_locked(TRUE);
-        
         if(isset($response["token"])){
             $this->set_token($response["token"]);
+            $this->set_status(Picovico_Config::VIDEO_STATUS_QUEUED);
             return $this->get_token();
         }else{
+            $this->set_status(Picovico_Config::VIDEO_STATUS_INCOMPLETE);
             $this->throw_api_exception("Error_Creating_Video_Exception");
         }
         
