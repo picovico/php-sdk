@@ -17,6 +17,7 @@
 // Picovico API Example
 
 require_once dirname(__FILE__)."/"."picovico.php";
+require_once dirname(__FILE__)."/"."config.example.php";
 
 class Picovico_Example{
 
@@ -30,9 +31,6 @@ class Picovico_Example{
     }
     
 }
-
-$pv_config = array();
-$pv_config["access_token"] = "2|iOcYxmxvhS6aqBaKQvUCtX9kF3VWU5ju2D1xZnStPJU";
 
 // Get Available Themes
 $pv = new Picovico_Theme($pv_config);
