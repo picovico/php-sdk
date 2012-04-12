@@ -529,6 +529,8 @@ class Picovico_Video extends Picovico{
     private $token = null;
     
     private $frames = array();
+    private $frames_counter = 0;
+    private $frames_identifers = array();
 
     private $locked = FALSE;
 
@@ -594,7 +596,18 @@ class Picovico_Video extends Picovico{
     }
 
     function get_frames(){
-        return $this->frames;
+
+        $ordered_frames_array = array();
+        
+        foreach($this->frames_identifers as $some_frame_identifier){
+            $ordered_frames_array[$some_frame_identifier] = $this->frames[$some_frame_identifier];
+        }
+
+        return $ordered_frames_array;
+    }
+
+    function get_frames_count(){
+        return count($this->frames);
     }
 
     public function get_locked(){
@@ -624,8 +637,9 @@ class Picovico_Video extends Picovico{
             $picovico_video->set_token($video_identifier);
 
             return $picovico_video;
+        }
 
-        }elseif(isset($response["url"])){
+        elseif(isset($response["url"])){
             // video is ready
             $picovico_video = new Picovico_Video(array());
             $picovico_video->set_status(Picovico_Config::VIDEO_STATUS_COMPLETE);
@@ -635,21 +649,32 @@ class Picovico_Video extends Picovico{
 
             return $picovico_video;
             
-        }else{
+        }
+
+        else{
             // something UFO happened :(
             $this->throw_api_exception();
         }
     }
 
     /**
+     * @unimplemented
+     * @todo
+     * 
      * Fetches videos created by the user identified by the access_token
+     *
+     * This video is currently unimplemented
      * 
      * @param <string> $access_token (optional) The access_token
      *
      * @return <array> array of Picovico_Video (s)
      */
     function get_my_videos($access_token = null){
-        // @todo
+        return array();
+    }
+
+    private function create_frame_identifier($type){
+        return $type . "_". $this->frames_counter++ . "_" . uniqid();
     }
     
     private function create_frame_data($type, $text = null, $url = null, $title = null){
@@ -661,30 +686,51 @@ class Picovico_Video extends Picovico{
         }elseif($type == Picovico_Config::FRAME_TYPE_TEXT){
             $frame_data["data"] = array("title"=>$title, "text"=>$text);
         }else{
-            $this->throw_api_exception("Invalid Frame Type");
+            $this->throw_api_exception("Invalid_Frame_Type_Exception");
         }
 
         return $frame_data;
     }
 
     /**
-     * Adds a frame to video
+     * Adds/Appends a frame to video
      * 
-     * @param <type> $type
-     * @param <type> $text
-     * @param <type> $url
-     * @param <type> $title
+     * @param <string> $type Type of the frame, one of the defined Frame types
+     * @param <string> $text Caption for Image frame, description for text frame
+     * @param <string> $url - URL if any image frame
+     * @param <string> $title - Description if a Text frame
+     *
+     * @return <string> The unique Frame Identifier
      */
     private function add_frame($type, $text = null, $url = null, $title = null){
+        $frame_identifier = $this->create_frame_identifier($type);
         $frame_data = $this->create_frame_data($type, $text, $url, $title);
-        $this->frames[] = $frame_data;
-        return TRUE;
+
+        $this->frames_identifers[] = $frame_identifier;        
+        $this->frames[$frame_identifier] = $frame_data;
+        
+        return $frame_identifier;
     }
 
+
+    /**
+     * Prepends a frame to video
+     *
+     * @param <string> $type Type of the frame, one of the defined Frame types
+     * @param <string> $text Caption for Image frame, description for text frame
+     * @param <string> $url - URL if any image frame
+     * @param <string> $title - Description if a Text frame
+     * 
+     * @return <string> The unique Frame Identifier
+     */
     private function prepend_frame($type, $text = null, $url = null, $title = null){
+        $frame_identifier = $this->create_frame_identifier($type);        
         $frame_data = $this->create_frame_data($type, $text, $url, $title);
-        array_unshift($this->frames, $frame_data);
-        return TRUE;
+
+        array_unshift($this->frames_identifers, $frame_identifier);
+        $this->frames[] = $frame_data;
+        
+        return $frame_identifier;
     }
 
     function add_text_frame($title, $text){
@@ -712,12 +758,12 @@ class Picovico_Video extends Picovico{
     }
 
     function shuffle_frames(){
-        shuffle($this->frames);
+        shuffle($this->frames_identifers);
         return TRUE;
     }
 
     function reverse_frames(){
-        array_reverse($this->frames);
+        array_reverse($this->frames_identifers);
         return TRUE;
     }
 
@@ -757,16 +803,15 @@ class Picovico_Video extends Picovico{
      * Create video
      */
     function create_video(){
-        // @todo - necessary testings before submitting the request
-
+        
         // check theme
         if(!$this->get_theme()){
-            $this->throw_api_exception("Theme not selected");
+            $this->throw_api_exception("Missing_Theme_Exception");
         }
 
         // music
         if(!$this->get_music_url()){
-            $this->throw_api_exception("Music not selected");
+            $this->throw_api_exception("Missing_Music_Exception");
         }
 
         // count frames
@@ -788,7 +833,7 @@ class Picovico_Video extends Picovico{
             $this->set_token($response["token"]);
             return $this->get_token();
         }else{
-            $this->throw_api_exception("Error Creating Video");
+            $this->throw_api_exception("Error_Creating_Video_Exception");
         }
         
     }
