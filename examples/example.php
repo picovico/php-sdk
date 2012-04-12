@@ -245,9 +245,9 @@ class Picovico_Example{
                         <hr />
                         Total Duration : "  .$video->get_duration() . "
                         <br />
-                        <a href='".$video->get_url().">".$video->get_thumbnail()."<br />
+                        <a href='".$video->get_url()."'><img width='250' src='".$video->get_thumbnail()."' /></a><br />
                             Check the Video
-                            </a>'
+                            </a>
                         ";
                 }
             }

@@ -584,7 +584,14 @@ class Picovico_Video extends Picovico{
     public function get_url($video_size = Picovico_Config::VIDEO_SIZE_360){
         if($this->get_status() == Picovico_Config::VIDEO_STATUS_COMPLETE){
             $video_url = @ $this->properties["video"][$video_size]["url"];
-            return $video_url;
+
+            if($video_url){
+                if(preg_match("/^(http\|http):\/\/.*/", $video_url)){
+                    return $video_url;
+                }else{
+                    return "http://".$video_url;
+                }
+            }
         }else{
             $this->throw_api_exception("Incomplete_Video_Exception");
         }
@@ -602,7 +609,15 @@ class Picovico_Video extends Picovico{
     public function get_thumbnail($thumbnail_size = Picovico_Config::VIDEO_SIZE_360){
         if($this->get_status() == Picovico_Config::VIDEO_STATUS_COMPLETE){
             $thumbnail_url = @ $this->properties["thumbnail"][$thumbnail_size];
-            return $thumbnail_url;
+
+            if($thumbnail_url){
+                if(preg_match("/^(http\|http):\/\/.*/", $thumbnail_url)){
+                    return $thumbnail_url;
+                }else{
+                    return "http://".$thumbnail_url;
+                }
+            }
+            
         }else{
             $this->throw_api_exception("Incomplete_Video_Exception");
         }
@@ -679,7 +694,6 @@ class Picovico_Video extends Picovico{
             // video is ready
             $picovico_video = new Picovico_Video(array());
             $picovico_video->set_status(Picovico_Config::VIDEO_STATUS_COMPLETE);
-            $picovico_video->set_url($response["url"]);
             $picovico_video->set_token($video_identifier);
 
             $picovico_video->set_properties($response);
