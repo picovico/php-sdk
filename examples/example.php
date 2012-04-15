@@ -201,11 +201,11 @@ switch($example){
 }
 
 
-$content = preg_replace("/^[ \t]*/", "", $content);
+$content = preg_replace("/[ ]+/", " ", $content);
 
 
 if (php_sapi_name() != 'cli') {
-    echo "</pre>";
+    echo "<pre>";
 }
 
 echo $content;
