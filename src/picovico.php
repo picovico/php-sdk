@@ -138,12 +138,31 @@ class Picovico_Exception extends Exception {
         }elseif(is_numeric ($result)){
             parent::__construct(NULL, $result);
         }else{
-            // do something else
-            $this->type = "Picovico_Exception";
+            // do something else            
+            $result = $this->to_array($result);
+            if(isset($result["type"]) AND $result["type"] ){
+                $this->type = $result["type"];
+            }else{
+                $this->type = "Picovico_Exception";
+            }
             parent::__construct($this->type);
         }
 
         $this->result = $result;
+    }
+
+    private function to_array($var){
+        if(is_array($var)){
+            return $var;
+        }elseif(is_object($var)){
+            $return = array();
+            foreach($var as $key=>$val){
+                $return[$key] = $val;
+            }
+            return $return;
+        }else{
+            return array($var);
+        }
     }
 
     /**
@@ -281,11 +300,9 @@ class Picovico {
 
         if ($result === FALSE) {
             $e = new Picovico_Exception(array(
-                        'error_code' => curl_errno($curl_handler),
-                        'error' => array(
-                            'message' => curl_error($curl_handler),
-                            'type' => 'CurlException',
-                        ),
+                        "type"=>"CurlException",
+                        'message' => curl_error($curl_handler),
+                        'code' => curl_errno($curl_handler)
                     ));
             curl_close($curl_handler);
             throw $e;
@@ -400,7 +417,7 @@ class Picovico_Theme extends Picovico{
 
     private $properties;
     
-    function  __construct($config) {
+    function  __construct($config = array()) {
         parent::__construct($config);
     }
 

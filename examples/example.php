@@ -54,36 +54,20 @@ class Picovico_Example{
     function themes(){
         $themes = $this->picovico_theme->get_available_themes();
 
-        $content = "<ol class='themes'>";
+        $content = "";
 
         foreach($themes as $t){
-            $content .=
-            "<li><a href='{$t->get_sample_url()}'>
-                <img src='{$t->get_thumbnail()}' width='250'/>
-                <br />
-                <span>
-                    {$t->get_name()}
-                </span>
-                </a>
-            </li>
+            $content .= "Theme : {$t->get_name()}\n
+            ----------------------
+            Sample URL: {$t->get_sample_url()}\n
+            Thumbnail URL: {$t->get_thumbnail()}\n
+
+
+            ======================
+
             ";
         }
-
-        $content .= "</ol>
-            <hr />
-
-            <h3>Code</h3>
-            <hr />
-            <pre>
-                \$config = array();
-                \$config['access_token'] = 'some-acces-tken';
-                \$pv = new Picovico_Theme(\$config);
-                \$pv->get_available_themes();
-                
-            </pre>
-
-            ";
-
+        
         return $content;
     }
 
@@ -121,149 +105,52 @@ class Picovico_Example{
         // add callback email
         $this->picovico_video->set_callback_email("acpmasquerade@picovico.com");
 
-        if($_POST["create"]){
+        // generate video
+        try{
 
-            // generate video
-            try{
+            $response_token = $this->picovico_video->create_video();
 
-                $response_token = $this->picovico_video->create_video();
+            $_SESSION["video_tokens"][] = $response_token;
 
-                $_SESSION["video_tokens"][] = $response_token;
+            $content .= "Video has been submitted for processing.\n
+                Video Token : {$response_token}\n
+                ";
 
-                $content .= "<hr />
-                    Video has been submitted for processing.
-                    <hr />
-                    Token is : {$response_token}
-                    <br />
-
-                    Check the status of Video -
-
-                    <a href='?video={$response_token}'>
-                        {$response_token}
-                    </a>
-                    ";
-
-            } catch (Picovico_Exception $e){
-                $content .= "
-                    Error submitting video request
-                    <hr />
-                    Reason: <strong>{$e->getType()}</strong>
-                    ";
-            }
-            
-        }else{
-
+        } catch (Picovico_Exception $e){
+            $content .= "Error submitting video request\n
+                Reason: {$e->getType()}\n
+                ";
         }
-
-        $content .= "
-
-            <form method='POST' action='?create'>
-                <center>                    
-                    <input type='submit' name='create' value='Click the button to proceed creating a video'>
-                </center>
-            </form>
-
-            <hr />
-
-            <h3>Code</h3>
-            <hr />
-            <pre>
-                // config
-                \$config = array();
-                \$config['access_token'] = 'some-acces-tken';
-
-                // picovico video object
-                \$pv = new Picovico_Video(\$config);
-
-                // add some text frames
-                \$pv->add_text_frame('Text title', 'text description')
-
-                // add some image frames
-                \$pv->add_image_frame('http://some-image-url/', 'some-image-caption');
-                \$pv->add_image_frame('http://some-image-url/', 'some-image-caption');
-                \$pv->add_image_frame('http://some-image-url/', 'some-image-caption');
-                \$pv->add_image_frame('http://some-image-url/', 'some-image-caption');
-
-
-                // set video title
-                \$pv->set_title('Hello Picovico');
-
-
-                // set video description
-                \$pv->set_description('some-video-description');
-
-
-                // set the music url ( mandatory )
-                \$pv->set_music_url('//some-music-url-.mp3');
-
-
-                // set the callback url ( mandataory ) 
-                \$pv->set_callback_url('//some-callback-url');
-
-
-                // set a callback email ( optional ) 
-                \$pv->set_callback_email('acpmasquerade@picovico.com');
-
-
-                // set a video theme ( mandatory ) 
-                \$theme = Picovico_Theme::new_dummy_theme('vanilla');
-                \$pv->set_theme(\$theme);
-
-                // create video 
-                \$response = \$pv->create_video();
-
-                // \$response is the token for the video just submitted. 
-
-            </pre>
-
-
-
-            ";
 
         return $content;
         
     }
 
-    function video(){
+    function video($token = null){
 
         $content = "";
-        
-        $token = $_GET["video"];
         
         if($token){
 
             try{
                 $video = $this->picovico_video->get_video($token);
 
-                $content .= "<hr />
-                Status - <strong>". $video->get_status_message() . "</strong>"
-                ."
-                ";
+                $content .= "Video Status : ". $video->get_status_message() . "\n";
 
                 if($video->get_status() == Picovico_Config::VIDEO_STATUS_COMPLETE){
-                    $content .= "
-                        <hr />
-                        Total Duration : "  .$video->get_duration() . "
-                        <br />
-                        <a href='".$video->get_url()."'><img width='250' src='".$video->get_thumbnail()."' /></a><br />
-                            Check the Video
-                            </a>
-                        ";
+                    $content .= "\nVideo is COMPLETE \n
+                        Total Duration : {$video->get_duration()} \n
+                        Video URL: {$video->get_url()} \n
+                        Video Thumbnail: {$video->get_thumbnail()} \n";
                 }
             }
             catch (Picovico_Exception $e){
-                $content .= " <hr />ERROR: <strong>{$e->getType()}</strong>";
+                $content .= " \nERROR: {$e->getType()}\n";
             }
-
             
         }
 
-
-        $content .= "<hr />
-            <h3>
-            Other Videos
-            </h3>
-            <ul>";
+        $content .= "\nOther Videos\n---------------------\n";
 
         // check the list of videos from session
         foreach($_SESSION["video_tokens"] as $some_token){
@@ -271,27 +158,8 @@ class Picovico_Example{
                 continue;
             }
 
-            $content .= 
-            "<li> <a href='?video={$some_token}'>".$some_token."</a></li>";
-            
+            $content .= "{$some_token}\n";            
         }
-
-        $content .= "</ul>";
-
-        $content .= "<hr />
-            <h3>Code</h3>
-            <hr />
-            <pre>
-            \$config = array ();
-            \$config['access_token'] = 'some-access-token';
-        
-            \$pv = new Picovico_Video();
-
-            \$v = \$pv->get_video('some-video-token');
-
-            </pre>
-
-        ";
 
         return $content;
     }
@@ -303,75 +171,43 @@ require_once dirname(__FILE__)."/"."config.example.php";
 // load config into the example class.
 $pv_example = new Picovico_Example($PV_config);
 
-if(isset($_GET["themes"])){
-    $content = $pv_example->themes();
-}elseif(isset($_GET["create"])){
-    $content = $pv_example->create_video();
-}elseif(isset($_GET["video"])){
-    $content = $pv_example->video();
+
+
+// ----------------------------- //
+// -- Run the Examples --------- //
+// ----------------------------- //
+
+// select one of the examples, from the list.
+
+# Example 1 : Check Themes
+$example = "themes";
+
+# Example 2 : Create Video
+//$example = "create";
+
+# Example 3 : Check a Video Status
+//$example = "video";
+//$video_token = "some-video-token";
+
+switch($example){
+    case "themes":
+        $content = $pv_example->themes();
+        break;
+    case "create":
+        $content = $pv_example->create_video();
+        break;
+    case "video":
+        $content = $pv_example->video($video_token);
 }
 
-// Generate View
-$HTML = <<<HTML
-    <html>
-        <head>
-            <title>
-                Picovico - Example [acpmasquerade@picovico.com]
-            </title>
-        </head>
-        <body>
-            <style type="text/css">
-                body{
-                    margin:0;padding:10px;
-                }
-                hr{
-                    height:1px; width:100%;margin:5px 0; padding:0; background:#aaa; border:0;
-                }
-                .navigation {
-                    border-top:1px solid #aaa;
-                    border-bottom:1px solid #aaa;
-                    padding:10px;
-                    margin:10px 0;
-                    background:#fafafa;
-                }
-                .navigation a{
-                    border-left:1px solid #aaa;
-                    border-right:1px solid #aaa;
-                    padding:0 5px;
-                    margin:0 5px;
-                    display:inline-block;
-                    color:black;
-                    text-decoration:underline;
-                }
-                .themes li
-                {
-                    border:1px dashed #aaa;
-                    padding:5px;
-                    display:inline-block;
-                    background:#fafafa;
-                }
 
-                .themes{
-                    padding:0;margin:0;
-                }
-            </style>
-            <h1>Picovico Examples</h1>
-            <h5>acpmasquerade@picovico.com</h5>
-            <div class="navigation">
-                <a href="?themes">Themes</a> -
-                <a href="?create">Create Video</a> -
-                <a href="?video">My Videos</a>
-            </div>
-            <div class="content">
-                {$content}
-            </div>
-        </body>
-    </html>
-HTML;
+$content = preg_replace("/^[ \t]*/", "", $content);
 
-echo $HTML;
 
-//$pv_example->themes();
+if (php_sapi_name() != 'cli') {
+    echo "</pre>";
+}
 
+echo $content;
 
 die();
