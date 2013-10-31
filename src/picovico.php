@@ -14,6 +14,12 @@
  * under the License.
  */
 
+/**
+ * Error Reporting switches
+ * PS: Please change the error reporting level as required.
+ */
+error_reporting(E_ALL);
+
 if (!function_exists('curl_init')) {
     throw new Exception('Picovico needs the CURL PHP extension.');
 }
@@ -206,8 +212,8 @@ class Picovico {
     /**
      * Version.
      */
-    const API_VERSION = '0.1alpha';
-    const VERSION = '0.1alpha';
+    const API_VERSION = '0.2alpha';
+    const VERSION = '0.2alpha';
 
     /**
      * Default options for curl.
@@ -216,7 +222,7 @@ class Picovico {
         CURLOPT_CONNECTTIMEOUT => 10,
         CURLOPT_RETURNTRANSFER => TRUE,
         CURLOPT_TIMEOUT => 60,
-        CURLOPT_USERAGENT => 'Picovico-php-0.1alpha',
+        CURLOPT_USERAGENT => 'Picovico-php-0.2alpha',
         CURLOPT_SSL_VERIFYPEER => FALSE,
     );
     /**
@@ -488,14 +494,18 @@ class Picovico_Theme extends Picovico{
         $url = $this->get_api_url("get_themes");
         $response = $this->make_json_request($url, array(), Picovico_Config::API_GET);
 
-        $themes = $response["themes"];
+		if(isset($response["themes"])){
+	        $themes = $response["themes"];
 
-        $themes_objects_array = array();
-        foreach($themes as $t){
-            $pv_theme = new Picovico_Theme();
-            $pv_theme->create_object_from_response($t);
-            $themes_objects_array[] = $pv_theme;
-        }
+    	    $themes_objects_array = array();
+        	foreach($themes as $t){
+            	$pv_theme = new Picovico_Theme();
+            	$pv_theme->create_object_from_response($t);
+            	$themes_objects_array[] = $pv_theme;
+       		}
+		}else{
+			$themes_objects_array = array();
+		}
 
         return $themes_objects_array;
     }
@@ -677,8 +687,10 @@ class Picovico_Video extends Picovico{
 
         $ordered_frames_array = array();
         
+        $frames_counter = 0;
         foreach($this->frames_identifers as $some_frame_identifier){
-            $ordered_frames_array[$some_frame_identifier] = $this->frames[$some_frame_identifier];
+            $ordered_frames_array[$frames_counter] = $this->frames[$some_frame_identifier];
+            $frames_counter++;
         }
 
         return $ordered_frames_array;
@@ -800,27 +812,39 @@ class Picovico_Video extends Picovico{
         return $frame_identifier;
     }
 
-    function add_text_frame($title, $text){
+    function add_text_frame($title, $text = null){
         return $this->add_frame(Picovico_Config::FRAME_TYPE_TEXT, $text, null, $title);
     }
 
-    function append_text_frame($title, $text){
+    function append_text_frame($title, $text = null){
         return $this->add_text_frame($title, $text);
     }
 
-    function prepend_text_frame(){
+    function prepend_text_frame($title, $text = null){
         return $this->prepend_frame(Picovico_Config::FRAME_TYPE_TEXT, $text, null, $title);
     }
 
-    function add_image_frame($url, $text){
+    /**
+     * Appends an Image Frame to the sequence.
+     * @param <string> $url - Publicly accessible URL of the image frame
+     * @param <string> $text - Caption for the image frame. (optional)
+     */
+    function add_image_frame($url, $text = null){
         return $this->add_frame(Picovico_Config::FRAME_TYPE_IMAGE, $text, $url);
     }
 
-    function append_image_frame($url, $text){
+    /**
+     * Appends an Image Frame to the sequence. (Alias function for add_image_frame)
+     * @refer add_image_frame($url, $text = null)
+     */
+    function append_image_frame($url, $text = null){
         return $this->add_image_frame($url, $text);
     }
 
-    function prepend_image_frame($url, $text){
+    /**
+     * Prends an Image Frame to the sequence.
+     */
+    function prepend_image_frame($url, $text = null){
         return $this->prepend_frame(Picovico_Config::FRAME_TYPE_IMAGE, $text, $url);
     }
 

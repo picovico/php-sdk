@@ -180,14 +180,17 @@ $pv_example = new Picovico_Example($PV_config);
 // select one of the examples, from the list.
 
 # Example 1 : Check Themes
-$example = "themes";
+# ($PV_config["example"] = "themes";)
 
 # Example 2 : Create Video
-//$example = "create";
+# ($PV_config["example"] = "create";)
 
 # Example 3 : Check a Video Status
-//$example = "video";
-//$video_token = "some-video-token";
+# ($PV_config["example"] = "video";)
+# ($PV_config["example_video_token"] = "some-video-token";)
+
+$example = $PV_config["example"];
+$example_video_token = $PV_config["example_video_token"];
 
 switch($example){
     case "themes":
@@ -197,7 +200,7 @@ switch($example){
         $content = $pv_example->create_video();
         break;
     case "video":
-        $content = $pv_example->video($video_token);
+        $content = $pv_example->video($example_video_token);
 }
 
 
