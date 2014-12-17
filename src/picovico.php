@@ -57,7 +57,6 @@ class Picovico extends PicovioBase{
 		parent::__construct($config);
 	}
 
-
 	/**
 	 * Login using Picovico username and password
 	 * If logged in successfully, login tokens are set.
@@ -77,10 +76,19 @@ class Picovico extends PicovioBase{
 		return $response;
 	}
 
+	/**
+	 * If any saved access_key and access_token available, continue with those available tokens
+	 * @param $access_key
+	 * @param $access_token
+	 */
 	function set_login_tokens($access_key, $access_token){
 		$this->request->set_tokens($access_key, $access_token);
 	}
 
+	/**
+	 * Open any existing project, not rendered yet
+	 * @param $video_id
+	 */
 	function open_project($video_id = NULL){
 		if($video_id != NULL){
 			$picovico_video = $this->get_video($video_id);
@@ -96,6 +104,11 @@ class Picovico extends PicovioBase{
 		}
 	}
 
+	/**
+	 * Start a new project. Automatically overwrites any existing project if still initial
+	 * @param $name
+	 * @param $quality - defaults to 360p
+	 */
 	function start_project($name, $quality = Picovico::Q_360P){
 		$params = array('name'=>$name, 'quality'=>$quality);
 		$response = $this->request->post(PicovicoUrl::create_video, $params);
