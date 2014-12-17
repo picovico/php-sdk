@@ -8,17 +8,16 @@ Picovico 2.0, the new version of Picovico, has been re-engineered and re-systema
 0.2alpha
 
 [API Documentation]
-http://developer.picovico.com/api.xhtml
+[http://picovico.readthedocs.org](Official REST API Documentation)
 
 [Author]
-acpmasquerade@picovico.com
+picovico.com
 
-[Demo]
-http://picovico.warehouse.acpmasquerade.com/example.html.php
+[Composer]
+...
 
-[Last-Modified]
-31st October, 2013
-
-[access_token:authentication]
-access_token is available by request. Please contact developers@picovico.com to receive one for your app.
-access_token is used as authentication for your Picovico apps.
+[Quickstart]
+...
+* `open_project`
+* `start_project`
+* `add_image`
