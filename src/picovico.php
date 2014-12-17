@@ -119,9 +119,19 @@ class Picovico extends PicovioBase{
 		return NULL;
 	}
 
+	function upload_image($image_path){
+		return parent::upload_image($image_path);
+	}
+
+	/**
+	 * @param $image_path
+	 * @param $caption
+	 */
 	function add_image($image_path, $caption = ""){
+
 		if($this->is_local_file($image_path)){
-			$this->request->put(array("file"=>$image_path))
+			$put_response = $this->request->put(array("file"=>$image_path))
+			$image_id = $put_response['id'];
 		}
 	}
 
@@ -141,16 +151,36 @@ class Picovico extends PicovioBase{
 
 	}
 
-	function save_video(){
-
+	function save_project(){
+		if(!$this->video_id){
+			return NULL;
+		}
+		$url = sprintf(PicovicoUrl::get_video, $video_id);
+		$this->request->post($url, )
 	}
 
 	function create_video(){
-
+		$url = sprintf(PicovicoUrl::get_video, $video_id);
 	}
 
 	function get_video($video_id){
 		$url = sprintf(PicovicoUrl::get_video, $video_id);
 		return $this->request->get($url, NULL, NULL, PicovicoRequest::GET, PicovicoRequest::AUTHORIZED);
+	}
+
+	function get_styles(){
+
+	}
+
+	function set_style($style_machine_name){
+		$this->vdd->
+	}
+
+	function set_quality(){
+
+	}
+
+	function add_credits(){
+
 	}
 }

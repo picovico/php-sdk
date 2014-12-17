@@ -101,4 +101,20 @@ class PicovicoBase {
         }
         return true;
     }
+
+    protected function upload_image($file_path){
+        if($this->is_local_file($file_path)){
+            return $this->request->put(PicovicoUrl::upload_photo, array("file"=>$file_path));
+        }else{
+            return $this->request->post(PicovicoUrl::upload_photo, array("url"=>$file_path, "source"=>"sdk", "thumbnail_url"=>$file_path));
+        }
+    }
+
+    protected function upload_music($file_path){
+        if($this->is_local_file($file_path)){
+            return $this->request->put(PicovicoUrl::upload_music, array("file"=>$file_path), array("X-Music-Artist": "Unknown", "X-Music-Title": "Unknown - ".date('r')));
+        }else{
+            return $this->request->post(PicovicoUrl::upload_music, array("url"=>$file_path, "source"=>"sdk", "thumbnail_url"=>$file_path));
+        }
+    }
 }
