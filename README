@@ -1,23 +1,20 @@
-Picovico - PHP Client Libraries
+#Picovico - Official PHP SDK
+Picovico is a online video creating platform.
 
-[Version]
-2.0 (coming soon)
+##Picovico 2.0
 Picovico 2.0, the new version of Picovico, has been re-engineered and re-systematized from the core. The latter version is improved towards providing better user experience and stability. SDK will be available for the new version very soon.
 
-[Version]
-0.2alpha
 
-[API Documentation]
-[http://picovico.readthedocs.org](Official REST API Documentation)
+##API Documentation
+http://picovico.readthedocs.org
 
-[Author]
+##Author
 picovico.com
 
-[Composer]
+##Composer
 ...
 
-[Quickstart]
-...
-* `open_project`
-* `start_project`
-* `add_image`
+##Functions Overview
+* `open_project()`
+* `start_project()`
+* `add_image()`
