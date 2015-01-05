@@ -24,34 +24,6 @@ class PicovicoBase {
     }
 
     /**
-     * Returns the Current URL,
-     *
-     * @return string The current URL
-     */
-    public static  function get_current_url() {
-        if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1)
-                || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'
-        ) {
-            $protocol = 'https://';
-        } else {
-            $protocol = 'http://';
-        }
-        $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-
-        $parts = parse_url($currentUrl);
-        
-        // use port if non default
-        $port =
-                isset($parts['port']) &&
-                (($protocol === 'http://' && $parts['port'] !== 80) ||
-                ($protocol === 'https://' && $parts['port'] !== 443)) ? ':' . $parts['port'] : '';
-
-        // rebuild
-        
-        return $protocol . $parts['host'] . $port . $parts['path'] . $query;
-    }
-
-    /**
      * Analyzes the supplied result to see if it was thrown
      * because the access token is no longer valid.  If that is
      * the case, then the persistent store is cleared.
@@ -94,14 +66,9 @@ class PicovicoBase {
         return $this->request->is_logged_in();
     }
 
-    public is_local_file($file_path){
-        $prefix = strtolower(substr($file_path, 0, 7));
-        if($prefix === "http://" || $prefix === "https:/"){
-            return false;
-        }
-        return true;
-    }
-
+    /**
+     * Upload if local image file, import if a remote file
+     */
     protected function upload_image($file_path){
         if($this->is_local_file($file_path)){
             return $this->request->put(PicovicoUrl::upload_photo, array("file"=>$file_path));
@@ -110,11 +77,58 @@ class PicovicoBase {
         }
     }
 
+    /**
+     * Upload if local music file, import if a remote file
+     */
     protected function upload_music($file_path){
         if($this->is_local_file($file_path)){
             return $this->request->put(PicovicoUrl::upload_music, array("file"=>$file_path), array("X-Music-Artist": "Unknown", "X-Music-Title": "Unknown - ".date('r')));
         }else{
             return $this->request->post(PicovicoUrl::upload_music, array("url"=>$file_path, "source"=>"sdk", "thumbnail_url"=>$file_path));
         }
+    }
+
+    /**
+     * Appends a slide onto the video project.
+     */
+    protected function append_vdd_slide($vdd, $slide){
+        if($vdd){
+            if(!isset($vdd->assets)){
+                $vdd->assets = array();
+            }
+            $vdd->assets[] = $slide;
+        }
+        return $vdd;
+    }
+
+    /**
+     * Prepares the slide data for image slides and appends to the vdd
+     */
+    protected function append_image_slide($vdd, $image_id, $caption = NULL){
+        $template = new stdClass();
+        $template->name = "image";
+        $template->data = new stdClass();
+        $template->data->text = $caption; 
+        $template->asset_id = $image_id; 
+        return $this->append_vdd_slide($vdd, $template);
+    }
+
+    /**
+     * Prepares the slide data for text slides and appends to the vdd
+     */
+    protected function append_text_slide($vdd, $title = NULL, $text = NULL){
+        $template = new stdClass();
+        $template->name = "text";
+        $template->data = new stdClass();
+        $template->data->text = $text;
+        $template->data->title = $title; 
+        return $this->append_vdd_slide($vdd, $template);
+    }
+
+    protected function append_music($vdd, $music_id){
+        $template = new stdClass();
+        $template->name = "music";
+        $template->asset_id = $music_id;
+        return $this->append_vdd_slide($vdd, $template);
     }
 }

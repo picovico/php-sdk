@@ -20,6 +20,7 @@ class PicovicoUrl{
 	const single_photo = "me/photos/%s";
 
 	const get_styles = "me/styles";
+	const get_public_styles = "styles";
 
 	const me = "me/";
 	const change_password = "me/changepassword";
