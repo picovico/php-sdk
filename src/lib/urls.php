@@ -13,11 +13,14 @@ class PicovicoUrl{
 
 	const get_musics = "me/musics";
 	const upload_music = "me/musics";
-	const single_music = "me/music";
+	const single_music = "me/musics/%s";
 
 	const upload_photo = "me/photos";
-	const get_styles = "me/styles";
 	const get_photos = "me/photos";
+	const single_photo = "me/photos/%s";
+
+	const get_styles = "me/styles";
+	const get_public_styles = "styles";
 
 	const me = "me/";
 	const change_password = "me/changepassword";
