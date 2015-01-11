@@ -17,200 +17,96 @@
 // just to save the tokens,
 session_start();
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Picovico API Example
 
 // picovico
-require_once dirname(__FILE__)."/../src/"."picovico.php";
+require_once __DIR__."/example.config.php";
+require_once __DIR__."/../src/"."picovico.php";
 
-class Picovico_Example{
+# LOGIN or set saved tokens
+// check session storage
+$app = new Picovico();
 
-    var $config = array();
-
-    var $picovico_theme = null;
-    var $picovico_video = null;
-
-    function  __construct($config = array()) {
-        $this->config = $config;
-
-        $this->picovico_theme = new Picovico_Theme($this->config);
-        $this->picovico_video = new Picovico_Video($this->config);
-
-        if(!isset($_SESSION["video_tokens"])){
-            $_SESSION["video_tokens"] = array();
-        }
-
-        // merge into the session, if any previous video tokens
-        if($config["video_tokens"]){
-            $video_tokens = $config["video_tokens"];
-            $session_tokens = $_SESSION["video_tokens"];
-
-            $all_video_tokens = array_unique(array_merge($video_tokens, $session_tokens));
-
-            $_SESSION["video_tokens"] = $all_video_tokens;
-        }
-        
-    }
-
-    function themes(){
-        $themes = $this->picovico_theme->get_available_themes();
-
-        $content = "";
-
-        foreach($themes as $t){
-            $content .= "Theme : {$t->get_name()}\n
-            ----------------------
-            Sample URL: {$t->get_sample_url()}\n
-            Thumbnail URL: {$t->get_thumbnail()}\n
-
-
-            ======================
-
-            ";
-        }
-        
-        return $content;
-    }
-
-    function create_video(){
-
-        $content = "";
-
-        // add image frames
-        $this->picovico_video->add_image_frame('http://farm7.static.flickr.com/6034/6227544215_fe9a9ed1ea_b.jpg', 'The predator and the prey');
-        $this->picovico_video->add_image_frame('http://farm7.static.flickr.com/6169/6228061064_413bf3da13_b.jpg');
-        $this->picovico_video->add_image_frame('http://farm7.static.flickr.com/6080/6115623115_ab728913f3_b.jpg', 'The eternal rays');
-
-        // add a text frame
-        $this->picovico_video->add_text_frame('Flora');
-
-        // add more frames
-        $this->picovico_video->add_image_frame('http://farm7.static.flickr.com/6014/5909306527_0ba1606f8f_b.jpg');
-        $this->picovico_video->add_image_frame('http://farm5.static.flickr.com/4079/4764595958_fee8a036f5_b.jpg');
-
-        // set a theme for the video
-        $theme = Picovico_Theme::new_dummy_theme("vanilla");
-        $this->picovico_video->set_theme($theme);
-
-        // add title
-        $this->picovico_video->set_title("Yet another Picovico Video");
-
-        // add music url
-        $this->picovico_video->set_music_url("http://www.picovico.com/assets/music/classical/Laendler.mp3");
-        // or, any other
-        //$this->picovico_video->set_music_url("http://wp.rdandy.com/wp-content/uploads/2011/01/04-Waka-Waka-Esto-es-Africa.mp3");
-
-        // add callback url
-        $this->picovico_video->set_callback_url("http://acpmasquerade.com/touch/picovico_callback.php?");
-
-        // add callback email
-        $this->picovico_video->set_callback_email("acpmasquerade@picovico.com");
-
-        // generate video
-        try{
-
-            $response_token = $this->picovico_video->create_video();
-
-            $_SESSION["video_tokens"][] = $response_token;
-
-            $content .= "Video has been submitted for processing.\n
-                Video Token : {$response_token}\n
-                ";
-
-        } catch (Picovico_Exception $e){
-            $content .= "Error submitting video request\n
-                Reason: {$e->getType()}\n
-                ";
-        }
-
-        return $content;
-        
-    }
-
-    function video($token = null){
-
-        $content = "";
-        
-        if($token){
-
-            try{
-                $video = $this->picovico_video->get_video($token);
-
-                $content .= "Video Status : ". $video->get_status_message() . "\n";
-
-                if($video->get_status() == Picovico_Config::VIDEO_STATUS_COMPLETE){
-                    $content .= "\nVideo is COMPLETE \n
-                        Total Duration : {$video->get_duration()} \n
-                        Video URL: {$video->get_url()} \n
-                        Video Thumbnail: {$video->get_thumbnail()} \n";
-                }
-            }
-            catch (Picovico_Exception $e){
-                $content .= " \nERROR: {$e->getType()}\n";
-            }
-            
-        }
-
-        $content .= "\nOther Videos\n---------------------\n";
-
-        // check the list of videos from session
-        foreach($_SESSION["video_tokens"] as $some_token){
-            if($some_token == $token){
-                continue;
-            }
-
-            $content .= "{$some_token}\n";            
-        }
-
-        return $content;
-    }
+function pv_dump($title, $arg = null){
+	echo "[*] {$title}";
+	echo "\n";
+	if($arg !== null){
+		print_r($arg);
+		echo "\n\n";
+	}
 }
 
-// config
-require_once dirname(__FILE__)."/"."config.example.php";
-
-// load config into the example class.
-$pv_example = new Picovico_Example($PV_config);
-
-
-
-// ----------------------------- //
-// -- Run the Examples --------- //
-// ----------------------------- //
-
-// select one of the examples, from the list.
-
-# Example 1 : Check Themes
-# ($PV_config["example"] = "themes";)
-
-# Example 2 : Create Video
-# ($PV_config["example"] = "create";)
-
-# Example 3 : Check a Video Status
-# ($PV_config["example"] = "video";)
-# ($PV_config["example_video_token"] = "some-video-token";)
-
-$example = $PV_config["example"];
-$example_video_token = $PV_config["example_video_token"];
-
-switch($example){
-    case "themes":
-        $content = $pv_example->themes();
-        break;
-    case "create":
-        $content = $pv_example->create_video();
-        break;
-    case "video":
-        $content = $pv_example->video($example_video_token);
+if(isset($_SESSION["PICOVICO_SESSION"])){
+	$PICOVICO_ACCESS_KEY = $_SESSION["PICOVICO_SESSION"]["access_key"];
+	$PICOVICO_ACCESS_TOKEN = $_SESSION["PICOVICO_SESSION"]["access_token"];
+	
+	$app->set_login_tokens($PICOVICO_ACCESS_KEY, $PICOVICO_ACCESS_TOKEN);
+}else{
+	try{
+		$login = $app->login($PICOVICO_USERNAME, $PICOVICO_PASSWORD);
+		$PICOVICO_ACCESS_KEY = $login["access_key"];
+		$PICOVICO_ACCESS_TOKEN = $login["access_token"];
+		$_SESSION["PICOVICO_SESSION"] = $login;
+	
+		pv_dump("Logged in as", $login["id"]);
+	}catch(Exception $e){
+		echo $e;
+		die();
+	}
 }
 
+// Begin
+try{
+	$project_id = $app->begin("Demo Project");
+	pv_dump("Project", $project_id);
 
-$content = preg_replace("/[ ]+/", " ", $content);
+	pv_dump("Add Text");
+	$app->add_text("PICOVICO", "API Demo");
 
+	pv_dump("Uploading Image 1");
+	$r = $app->add_image("https://farm6.staticflickr.com/5529/11078119266_96b048acfc_k_d.jpg", "Pick any image", "flickr");
+	pv_dump("Uploading Image 2");
+	sleep(1);
+	$r = $app->add_image("https://farm8.staticflickr.com/7408/11078075176_b60bfe6f0a_k_d.jpg", "And a background music", "flickr");
+	pv_dump("Uploading Image 3");
+	$r = $app->add_image("https://farm4.staticflickr.com/3796/11078026996_f6304ada65_k_d.jpg", "Did you see the caption ?", "flickr");
+	sleep(1);
+	pv_dump("Uploading Image 4");
+	$r = $app->add_image("https://farm6.staticflickr.com/5521/11027474124_c94b42a0e2_k_d.jpg", "", "flickr");
+	sleep(1);
+	pv_dump("Uploading Image 5");
+	$r = $app->add_image("https://farm8.staticflickr.com/7437/11027337296_48822cc37a_h_d.jpg", "and you missed one caption.", "flickr");
+	pv_dump("Uploading Image 6");
+	$r = $app->add_image("https://farm3.staticflickr.com/2813/11027391384_afea13950a_k_d.jpg", "still reached to end of the video.", "flickr");
 
-if (php_sapi_name() != 'cli') {
-    echo "<pre>";
+	pv_dump("Style");
+	$app->set_style("vanilla");
+
+	pv_dump("Quality");
+	$app->set_quality(Picovico::Q_360P);
+
+	pv_dump("Add Music");
+	$app->add_music("https://s3-us-west-2.amazonaws.com/pv-audio-library/samples/freemusicarchive.org.the.impossebulls.02.havenots.mascot.revolution.mp3");
+	$app->add_credits("Music", "The Impossebulls\nfreemusicarchive.org");
+
+	$r = $app->create();
+
+	// Video is being created.
+	pv_dump("LOOPing 15 seconds to check video status");
+	while(true){		
+		sleep(15);
+		$video = $app->get($project_id);
+		if(isset($video["video"])){
+			pv_dump("Video READY", $video["video"]);
+			break;
+		}
+		pv_dump("Video", $video);
+	}
+
+}catch(Exception $e){
+	echo $e;
+	die();
 }
-
-echo $content;
-
-die();
