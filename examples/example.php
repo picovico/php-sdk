@@ -17,46 +17,8 @@
 // just to save the tokens,
 session_start();
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Picovico API Example
-
-// picovico
-require_once __DIR__."/example.config.php";
-require_once __DIR__."/../src/"."picovico.php";
-
-# LOGIN or set saved tokens
-// check session storage
-$app = new Picovico();
-
-function pv_dump($title, $arg = null){
-	echo "[*] {$title}";
-	echo "\n";
-	if($arg !== null){
-		print_r($arg);
-		echo "\n\n";
-	}
-}
-
-if(isset($_SESSION["PICOVICO_SESSION"])){
-	$PICOVICO_ACCESS_KEY = $_SESSION["PICOVICO_SESSION"]["access_key"];
-	$PICOVICO_ACCESS_TOKEN = $_SESSION["PICOVICO_SESSION"]["access_token"];
-	
-	$app->set_login_tokens($PICOVICO_ACCESS_KEY, $PICOVICO_ACCESS_TOKEN);
-}else{
-	try{
-		$login = $app->login($PICOVICO_USERNAME, $PICOVICO_PASSWORD);
-		$PICOVICO_ACCESS_KEY = $login["access_key"];
-		$PICOVICO_ACCESS_TOKEN = $login["access_token"];
-		$_SESSION["PICOVICO_SESSION"] = $login;
-	
-		pv_dump("Logged in as", $login["id"]);
-	}catch(Exception $e){
-		echo $e;
-		die();
-	}
-}
+// Account Login and APP authentication
+include_once __DIR__."/lib/base.php";
 
 // Begin
 try{
