@@ -20,8 +20,15 @@ class PicovicoBase {
      * @param array $config The application configuration
      */
     public function __construct($config) {
-        $request = new PicovicoRequest();
+        $this->request = new PicovicoRequest();
     }
+
+	public static function generated_device_id(){
+		if(defined("PICOVICO_DEVICE_ID")){
+			return PICOVICO_DEVICE_ID;
+		}
+		return "PICOVICO_PHP_SDK_2.0";
+	}
 
     /**
      * Analyzes the supplied result to see if it was thrown
@@ -62,73 +69,95 @@ class PicovicoBase {
         die();
     }
 
-    public is_logged_in(){
+    public function is_logged_in(){
         return $this->request->is_logged_in();
     }
 
     /**
      * Upload if local image file, import if a remote file
      */
-    protected function upload_image($file_path){
-        if($this->is_local_file($file_path)){
-            return $this->request->put(PicovicoUrl::upload_photo, array("file"=>$file_path));
+    protected function upload_image($file_path, $source = NULL){
+        if(PicovicoUtils::is_local_file($file_path)){
+            return $this->request->put(PicovicoUrl::upload_photo, $file_path);
         }else{
-            return $this->request->post(PicovicoUrl::upload_photo, array("url"=>$file_path, "source"=>"sdk", "thumbnail_url"=>$file_path));
+            return $this->request->post(PicovicoUrl::upload_photo, array("url"=>$file_path, "source"=>$source, "thumbnail_url"=>$file_path));
         }
     }
 
     /**
      * Upload if local music file, import if a remote file
      */
-    protected function upload_music($file_path){
-        if($this->is_local_file($file_path)){
-            return $this->request->put(PicovicoUrl::upload_music, array("file"=>$file_path), array("X-Music-Artist": "Unknown", "X-Music-Title": "Unknown - ".date('r')));
+    protected function upload_music($file_path, $source = NULL){
+    if(PicovicoUtils::is_local_file($file_path)){
+            return $this->request->put(PicovicoUrl::upload_music, $file_path, array("X-Music-Artist"=>"Unknown", "X-Music-Title"=>"Unknown - ".date('r')));
         }else{
-            return $this->request->post(PicovicoUrl::upload_music, array("url"=>$file_path, "source"=>"sdk", "thumbnail_url"=>$file_path));
+            return $this->request->post(PicovicoUrl::upload_music, array("url"=>$file_path, "preview_url"=>$file_path));
         }
     }
 
     /**
      * Appends a slide onto the video project.
      */
-    protected function append_vdd_slide($vdd, $slide){
+    protected static function append_vdd_slide(&$vdd, $slide){
         if($vdd){
-            if(!isset($vdd->assets)){
-                $vdd->assets = array();
+            if(!is_array($vdd["assets"])){
+                $vdd["assets"] = array();
             }
-            $vdd->assets[] = $slide;
+            $last_slide = NULL;
+            $current_slides_count = count($vdd["assets"]);
+            $last_end_time = 0;
+            if($vdd["assets"]){
+                $last_slide = $vdd["assets"][count($vdd["assets"]) - 1];
+                if(is_array($last_slide)){
+                    $last_end_time = $last_slide["end_time"]; 
+                }else{
+                    $last_end_time = $last_slide->end_time;
+                }
+            }
+            $slide->start_time = $last_end_time;
+            $slide->end_time = $last_end_time + Picovico::STANDARD_SLIDE_DURATION;
+            $vdd["assets"][] = $slide;
         }
-        return $vdd;
     }
 
     /**
      * Prepares the slide data for image slides and appends to the vdd
      */
-    protected function append_image_slide($vdd, $image_id, $caption = NULL){
+    protected static function append_image_slide(&$vdd, $image_id, $caption = NULL){
         $template = new stdClass();
         $template->name = "image";
         $template->data = new stdClass();
         $template->data->text = $caption; 
         $template->asset_id = $image_id; 
-        return $this->append_vdd_slide($vdd, $template);
+        self::append_vdd_slide($vdd, $template);
     }
 
     /**
      * Prepares the slide data for text slides and appends to the vdd
      */
-    protected function append_text_slide($vdd, $title = NULL, $text = NULL){
+    protected static function append_text_slide(&$vdd, $title = NULL, $text = NULL){
         $template = new stdClass();
         $template->name = "text";
         $template->data = new stdClass();
         $template->data->text = $text;
         $template->data->title = $title; 
-        return $this->append_vdd_slide($vdd, $template);
+        self::append_vdd_slide($vdd, $template);
     }
 
-    protected function append_music($vdd, $music_id){
+    /**
+     * Saves music for the current video project.
+     * Saved separately because only one music is supported.
+     */
+    protected function set_music(&$vdd, $music_id){
         $template = new stdClass();
         $template->name = "music";
         $template->asset_id = $music_id;
-        return $this->append_vdd_slide($vdd, $template);
+        $template->_comment_ = "Will be replaced later";
+        $vdd["_music"] = $template;
+    }
+
+    protected static function append_music(&$vdd){
+        self::append_vdd_slide($vdd, $vdd["_music"]);
+        unset($vdd["_music"]);
     }
 }

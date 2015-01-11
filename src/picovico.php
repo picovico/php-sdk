@@ -18,8 +18,13 @@
  * Error Reporting switches
  * PS: Please change the error reporting level as required.
  */
-error_reporting(0);
-session_start();
+if(defined("PICOVICO_DEBUG") AND PICOVICO_DEBUG === TRUE){
+	error_reporting(E_ALL);
+	ini_set('display_errors', 1);
+}else{
+	error_reporting(0);
+	session_start();
+}
 
 if (!function_exists('curl_init')) {
     throw new Exception('Picovico needs the CURL PHP extension.');
@@ -33,14 +38,15 @@ require_once __DIR__."/lib/exception.php";
 require_once __DIR__."/lib/base.php";
 require_once __DIR__."/lib/request.php";
 require_once __DIR__."/lib/urls.php";
+require_once __DIR__."/lib/utils.php";
 
 /**
  * Picovico Class for end API developers
  * Handles all necessary steps related to the video definition and creation process. 
  */
-class Picovico extends PicovioBase{
+class Picovico extends PicovicoBase{
 
-	const API_VERSION = '2.0';
+    const API_VERSION = '2.0';
     const VERSION = '2.0.1';
     const API_SERVER = 'uapi-f1.picovico.com';
 
@@ -50,17 +56,21 @@ class Picovico extends PicovioBase{
     const VIDEO_PROCESSING = "processing";
 
     /** Rendering Quality Levels */
-    const Q_360P = "360"; // ld
-    const Q_480P = "480"; // sd
-    const Q_720P = "720"; // md
-    const Q_1080P = "1080"; // hd
+    const Q_360P = 360; // ld
+    const Q_480P = 480; // sd
+    const Q_720P = 720; // md
+    const Q_1080P = 1080; // hd
+
+    const STANDARD_SLIDE_DURATION = 5;
 
     // Video Data for the final video request
-    private $vdd = null;
+    private $vdd = NULL;
     private $video_id = NULL;
 
-	function __construct($config){
+	function __construct($config = NULL){
 		parent::__construct($config);
+		$this->vdd = array();
+		$this->video_id = NULL;
 	}
 
 	/**
@@ -97,7 +107,7 @@ class Picovico extends PicovioBase{
 	 */
 	function open($video_id = NULL){
 		$this->video_id = NULL;
-		$this->vdd = NULL;
+		$this->vdd = array();
 		if($video_id != NULL){
 			$picovico_video = $this->get_video($video_id);
 			if($picovico_video['status'] === Picovico::VIDEO_INITIAL){
@@ -115,12 +125,14 @@ class Picovico extends PicovioBase{
 	 */
 	function begin($name, $quality = Picovico::Q_360P){
 		$this->video_id = NULL;
-		$this->vdd = NULL;
+		$this->vdd = array();
 		$params = array('name'=>$name, 'quality'=>$quality);
-		$response = $this->request->post(PicovicoUrl::create_video, $params);
+		$response = $this->request->post(PicovicoUrl::begin_project, $params);
 		if($response['id']){
 			$this->video_id = $response['id'];
 			$this->vdd = $response;
+			// truncate assets if defined already, open existing project to retain
+			$this->vdd["assets"] = array();
 		}
 		return $this->video_id;
 	}
@@ -128,15 +140,15 @@ class Picovico extends PicovioBase{
 	/**
 	 * Upload local image file or any remote image to the logged in account.
 	 */
-	function upload_image($image_path){
-		return parent::upload_image($image_path);
+	function upload_image($image_path, $source = NULL){
+		return parent::upload_image($image_path, $source);
 	}
 
 	/**
 	 * Upload local music file or any remote music to the logged in account. 
 	 */
-	function upload_music($music_path){
-		return parent::upload_music($music_path);
+	function upload_music($music_path, $source = NULL){
+		return parent::upload_music($music_path, $source);
 	}
 
 	/**
@@ -144,10 +156,10 @@ class Picovico extends PicovioBase{
 	 * @param $image_path
 	 * @param $caption
 	 */
-	function add_image($image_path, $caption = ""){
-		$image_response = $this->upload_image($image_path);
-		if($image_response["id"]){
-			$this->vdd = $this->add_library_image($image_response["id"], $caption);
+	function add_image($image_path, $caption = "", $source = "hosted"){
+		$image_response = $this->upload_image($image_path, $source);
+		if(isset($image_response["id"])){
+			$this->add_library_image($image_response["id"], $caption);
 		}
 	}
 
@@ -156,7 +168,7 @@ class Picovico extends PicovioBase{
 	 */
 	function add_library_image($image_id, $caption = ""){
 		if($image_id){
-			$this->vdd = parent::append_image_slide($this->vdd, $image_id, $caption);
+			PicovicoBase::append_image_slide($this->vdd, $image_id, $caption);
 		}
 	}
 
@@ -165,7 +177,7 @@ class Picovico extends PicovioBase{
 	 */
 	function add_text($title = "", $text = ""){
 		if($title OR $text){
-			$this->vdd = parent::append_text_slide($this->vdd, $title, $text);	
+			PicovicoBase::append_text_slide($this->vdd, $title, $text);	
 		}
 	}
 
@@ -174,8 +186,8 @@ class Picovico extends PicovioBase{
 	 */
 	function add_music($music_path){
 		$music_response = $this->upload_music($music_path);
-		if($music_response["id"]){
-			$this->vdd = $this->add_library_music($music_response["id"]);
+		if(isset($music_response["id"])){
+			$this->add_library_music($music_response["id"]);
 		}
 	}
 
@@ -183,7 +195,7 @@ class Picovico extends PicovioBase{
 	 * Define any previously uploaded music, or any music available from library. 
 	 */
 	function add_library_music($music_id){
-		$this->vdd = parent::append_music($this->vdd, $music_id);
+		PicovicoBase::set_music($this->vdd, $music_id);
 	}
 
 	/**
@@ -198,14 +210,14 @@ class Picovico extends PicovioBase{
 	 * Defines style for the current video project
 	 */
 	function set_style($style_machine_name){
-		$this->vdd->style = $style_machine_name;
+		$this->vdd["style"] = $style_machine_name;
 	}
 
 	/*
 	 * Defines rendering quality for the current video project
 	 */
 	function set_quality($quality){
-		$this->vdd->quality = $quality;
+		$this->vdd["quality"] = intval($quality);
 	}
 
 	/**
@@ -213,10 +225,10 @@ class Picovico extends PicovioBase{
 	 */
 	function add_credits($title = null, $text = null){
 		if($title or $text){
-			if(!isset($this->vdd->credits)){
-				$this->vdd->credits = array();
+			if(!isset($this->vdd["credit"])){
+				$this->vdd["credit"] = array();
 			}
-			$this->vdd->credits[] = [$title, $text];
+			$this->vdd["credit"][] = array($title, $text);
 		}
 	}
 
@@ -224,14 +236,14 @@ class Picovico extends PicovioBase{
 	 * Clear all credit slides
 	 */
 	function remove_credits(){
-		$this->vdd->credits = array();
+		$this->vdd["credit"] = array();
 	}
 
 	/**
 	 * Fetch any existing video. Use open() for editing.
 	 */
 	function get($video_id){
-		$url = sprintf(PicovicoUrl::get_video, $video_id);
+		$url = sprintf(PicovicoUrl::single_video, $video_id);
 		return $this->request->get($url);
 	}
 
@@ -239,13 +251,16 @@ class Picovico extends PicovioBase{
 		if(!$this->video_id){
 			return NULL;
 		}
-		$url = sprintf(PicovicoUrl::save_video, $video_id);
-		$this->request->post($url, $this->vdd);
+		// fix music first
+		parent::append_music($this->vdd);
+		$url = sprintf(PicovicoUrl::save_video, $this->video_id);
+		return $this->request->post($url, $this->vdd);
 	}
 
 	function create(){
-		$this->save();
-		$url = sprintf(PicovicoUrl::create_video, $video_id);
+		$response = $this->save();
+		$url = sprintf(PicovicoUrl::create_video, $this->video_id);
 		return $this->request->post($url);
 	}
 }
+
