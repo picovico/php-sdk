@@ -19,14 +19,14 @@ include 'src/picovico.php';
 $app = new Picovico();
 $app->login('PICOVICO_USERNAME', 'PICOVICO_PASSWORD');
 $project_id = $app->begin('Hello World');
+$app->set_style('vanilla');
 $app->add_text('Hello World', 'Let\'s Picovico');
 $app->add_image('http://s3-us-west-2.amazonaws.com/pv-styles/christmas/pv_christmas_winter_themes.png');
 $app->add_image('http://s3.amazonaws.com/pvcdn2/video/8501d6865c2d484abb2e8a858cffca80/8501d6865c2d484abb2e8a858cffca80-360.jpg', 'Image captions are optional');
 $app->add_image('http://www.picovico.com/blog/wp-content/uploads/2014/12/Yearbook-Screenshot.jpg');
-$app->set_quality(Picovico::Q_360P);
-$app->set_style('vanilla');
 $app->add_music('http://s3.amazonaws.com/picovico-1/assets/music/Latin/Latinish.mp3');
 $app->add_credits('Music', 'Frank Nora');
+$app->set_quality(Picovico::Q_360P);
 $app->create();
 ```
 
