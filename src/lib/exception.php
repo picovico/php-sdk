@@ -76,7 +76,7 @@ class PicovicoException extends Exception {
      * @return string The string representation of the error
      */
     public function __toString() {
-        return "".$this->type;
+        return "".$this->type ."\n" . json_encode($this->result)."\n-\n";
     }
 
 }
