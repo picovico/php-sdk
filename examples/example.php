@@ -54,6 +54,8 @@ try{
 	$app->add_music("https://s3-us-west-2.amazonaws.com/pv-audio-library/samples/freemusicarchive.org.the.impossebulls.02.havenots.mascot.revolution.mp3");
 	$app->add_credits("Music", "The Impossebulls\nfreemusicarchive.org");
 
+	$app->set_callback_url("http://demo.picovico.com/callback_receiver/");
+
 	$r = $app->create();
 
 	// Video is being created.

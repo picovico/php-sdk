@@ -19,7 +19,7 @@ class PicovicoBase {
      *
      * @param array $config The application configuration
      */
-    public function __construct($config) {
+    public function __construct() {
         $this->request = new PicovicoRequest();
     }
 
@@ -27,7 +27,7 @@ class PicovicoBase {
 		if(defined("PICOVICO_DEVICE_ID")){
 			return PICOVICO_DEVICE_ID;
 		}
-		return "PICOVICO_PHP_SDK_2.0";
+		return "PICOVICO_PHP_SDK_2.1";
 	}
 
     /**
@@ -156,8 +156,13 @@ class PicovicoBase {
         $vdd["_music"] = $template;
     }
 
+    /**
+     * If music is set and not appended to the VDD slide, appends the music as vdd slide
+     */
     protected static function append_music(&$vdd){
-        self::append_vdd_slide($vdd, $vdd["_music"]);
-        unset($vdd["_music"]);
+        if(isset($vdd["_music"])){
+            self::append_vdd_slide($vdd, $vdd["_music"]);
+            unset($vdd["_music"]);
+        }
     }
 }

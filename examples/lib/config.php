@@ -22,3 +22,10 @@ $PICOVICO_ACCESS_TOKEN = "";
 
 $PICOVICO_USERNAME = "apidemo";
 $PICOVICO_PASSWORD = "apidemo";
+
+// starting from 2.1, app_id and app_secret should be used to authenticate the app
+$PICOVICO_APP_ID = "c4faa7f2abc3f60a6839260072dd5bbe38c60d7c8f65f0255ad7b1c5e3c1c113";
+$PICOVICO_APP_SECRET = "8184e3b64fab49573b9cd7bbd63d44ee85bc85689d4909a37605df92266906cf";
+
+
+
