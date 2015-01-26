@@ -4,6 +4,8 @@ Picovico is a online video creating platform.
 ##Picovico 2.0
 Picovico 2.0, the latest version of Picovico, which has been re-engineered and re-systematized from the core. The latter version is improved towards providing better user experience and stability. SDK will be available for the new version very soon.
 
+## API Version
+2.1
 
 ##API Documentation
 [picovico.readthedocs.org](http://picovico.readthedocs.org)
@@ -13,6 +15,7 @@ Picovico 2.0, the latest version of Picovico, which has been re-engineered and r
 
 ##Functions Overview
 * `login` - Login with username and password
+* `authenticate` - Login with app_id and app_secret (API version 2.1 or above required)
 * `set_login_tokens` - Set authentication tokens if saved earlier
 * `open` - open any existing video project
 * `begin` - begin with a new video project
