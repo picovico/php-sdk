@@ -46,8 +46,8 @@ require_once __DIR__."/lib/utils.php";
  */
 class Picovico extends PicovicoBase{
 
-    const API_VERSION = '2.0';
-    const VERSION = '2.0.1';
+    const API_VERSION = '2.1';
+    const VERSION = '2.0.2';
     const API_SERVER = 'uapi-f1.picovico.com';
 
     /** Available Video rendering states */
@@ -66,11 +66,19 @@ class Picovico extends PicovicoBase{
     // Video Data for the final video request
     private $vdd = NULL;
     private $video_id = NULL;
+    private $app_id = NULL; // provided during developer signup. 
+    private $app_secret = NULL; // provided during developer signup. 
+    private $device_id = NULL; // more a developer specific variable, which can be used to identify different deployment instances
 
-	function __construct($config = NULL){
-		parent::__construct($config);
+	function __construct($app_id = NULL, $app_secret = NULL, $device_id = NULL){
+		parent::__construct();
 		$this->vdd = array();
 		$this->video_id = NULL;
+		$this->app_id = $app_id;
+		$this->app_secret = $app_secret;
+		if(!$device_id){
+			$this->device_id = $this->generated_device_id();
+		}
 	}
 
 	/**
@@ -81,9 +89,26 @@ class Picovico extends PicovicoBase{
 	 */
 	function login($username, $password){
 
-		$params = array('username'=>$username,'password'=>$password, 'device_id'=>$this->generated_device_id());
+		$params = array('app_id'=>$this->app_id, 'username'=>$username,'password'=>$password, 'device_id'=>$this->device_id);
 
 		$response = $this->request->make_request(PicovicoUrl::login, $params, NULL, PicovicoRequest::POST, PicovicoRequest::ANONYMOUS);
+
+		if(isset($response['access_key']) AND isset($response['access_token'])){
+			$this->set_login_tokens($response['access_key'], $response['access_token']);
+		}
+
+		return $response;
+	}
+
+	/**
+ 	 * Starting from 2.1 version of the API, all apps should authenticate themselves before they can make requests to the system.
+	 * This function authenticates app with app_id and app_secret. The owner owning the application will be logged in then.
+	 */
+	function authenticate(){
+
+		$params = array('app_id'=>$this->app_id,'app_secret'=>$this->app_secret, 'device_id'=>$this->device_id);
+
+		$response = $this->request->make_request(PicovicoUrl::app_authenticate, $params, NULL, PicovicoRequest::POST, PicovicoRequest::ANONYMOUS);
 
 		if(isset($response['access_key']) AND isset($response['access_token'])){
 			$this->set_login_tokens($response['access_key'], $response['access_token']);
@@ -237,6 +262,13 @@ class Picovico extends PicovicoBase{
 	 */
 	function remove_credits(){
 		$this->vdd["credit"] = array();
+	}
+
+	/**
+	 * Callback URL
+	 */
+	function set_callback_url($url){
+		$this->vdd["callback_url"] = $url;
 	}
 
 	/**

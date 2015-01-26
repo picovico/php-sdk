@@ -4,6 +4,7 @@
 
 class PicovicoUrl{
 	const login = "login";
+	const app_authenticate = "login/app";
 
 	const begin_project = "me/videos";
 	const get_videos = "me/videos";
