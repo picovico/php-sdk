@@ -24,7 +24,7 @@ require_once __DIR__."/../../src/"."picovico.php";
 
 # LOGIN or set saved tokens
 // check session storage
-$app = new Picovico();
+$app = new Picovico($PICOVICO_APP_ID, $PICOVICO_APP_SECRET, PICOVICO_DEVICE_ID);
 
 function pv_dump($title, $arg = null){
 	echo "[*] {$title}";
@@ -42,7 +42,7 @@ if(isset($_SESSION["PICOVICO_SESSION"])){
 	$app->set_login_tokens($PICOVICO_ACCESS_KEY, $PICOVICO_ACCESS_TOKEN);
 }else{
 	try{
-		$login = $app->login($PICOVICO_USERNAME, $PICOVICO_PASSWORD);
+		$login = $app->authenticate();
 		$PICOVICO_ACCESS_KEY = $login["access_key"];
 		$PICOVICO_ACCESS_TOKEN = $login["access_token"];
 		$_SESSION["PICOVICO_SESSION"] = $login;
