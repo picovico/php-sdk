@@ -118,6 +118,13 @@ class Picovico extends PicovicoBase{
 	}
 
 	/**
+ 	 * Account Profile /me
+	 */
+	function profile(){
+		return $this->request->make_request(PicovicoUrl::me, array(), NULL, PicovicoRequest::GET);
+	}
+
+	/**
 	 * If any saved access_key and access_token available, continue with those available tokens
 	 * @param $access_key
 	 * @param $access_token

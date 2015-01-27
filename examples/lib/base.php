@@ -53,3 +53,6 @@ if(isset($_SESSION["PICOVICO_SESSION"])){
 		die();
 	}
 }
+
+
+pv_dump("Profile", $app->profile());
