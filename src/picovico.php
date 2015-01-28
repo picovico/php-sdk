@@ -141,7 +141,7 @@ class Picovico extends PicovicoBase{
 		$this->video_id = NULL;
 		$this->vdd = array();
 		if($video_id != NULL){
-			$picovico_video = $this->get_video($video_id);
+			$picovico_video = $this->get($video_id);
 			if($picovico_video['status'] === Picovico::VIDEO_INITIAL){
 				$this->video_id = $video_id;
 				$this->vdd =  $picovico_video;
