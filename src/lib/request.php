@@ -67,7 +67,7 @@ class PicovicoRequest{
     		return NULL;
     	}
 
-    	$url = "http://".Picovico::API_SERVER."/v".Picovico::API_VERSION."/".$url;
+    	$url = "https://".Picovico::API_SERVER."/v".Picovico::API_VERSION."/".$url;
 
         $ch = curl_init();
         
