@@ -10,6 +10,7 @@ class PicovicoUrl{
 	const get_videos = "me/videos";
 	const single_video = "me/videos/%s";
 	const save_video = "me/videos/%s";
+	const preview_video = "me/videos/%s/preview";
 	const create_video = "me/videos/%s/render";
 
 	const get_musics = "me/musics";

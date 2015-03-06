@@ -280,12 +280,16 @@ class Picovico extends PicovicoBase{
 
 	/**
 	 * Fetch any existing video. Use open() for editing.
+	 * @param $video_id - alphanumeric Identifier of the project
 	 */
 	function get($video_id){
 		$url = sprintf(PicovicoUrl::single_video, $video_id);
 		return $this->request->get($url);
 	}
 
+	/**
+	 * Save the current progress with the project
+	 */
 	function save(){
 		if(!$this->video_id){
 			return NULL;
@@ -296,6 +300,20 @@ class Picovico extends PicovicoBase{
 		return $this->request->post($url, $this->vdd);
 	}
 
+	/**
+	 * Make a preview request for the project. 
+	 * Will generate 144p video is preview is available for the style.
+	 * rendering state of the video will not be changed.
+	 */
+	function preview(){
+		$response = $this->save();
+		$url = sprintf(PicovicoUrl::preview_video, $this->video_id);
+		return $this->request->post($url);
+	}
+
+	/**
+	 * Send the actual rendering request to rendering engine
+	 */
 	function create(){
 		$response = $this->save();
 		$url = sprintf(PicovicoUrl::create_video, $this->video_id);
