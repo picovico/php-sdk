@@ -47,8 +47,8 @@ require_once __DIR__."/lib/utils.php";
 class Picovico extends PicovicoBase{
 
     const API_VERSION = '2.1';
-    const VERSION = '2.0.2';
-    const API_SERVER = 'uapi-f1.picovico.com';
+    const VERSION = '2.0.5';
+    const API_SERVER = 'api.picovico.com';
 
     /** Available Video rendering states */
     const VIDEO_INITIAL = "initial";
@@ -193,6 +193,7 @@ class Picovico extends PicovicoBase{
 		if(isset($image_response["id"])){
 			$this->add_library_image($image_response["id"], $caption);
 		}
+		return $image_response;
 	}
 
 	/**
@@ -201,7 +202,9 @@ class Picovico extends PicovicoBase{
 	function add_library_image($image_id, $caption = ""){
 		if($image_id){
 			PicovicoBase::append_image_slide($this->vdd, $image_id, $caption);
+			return true;
 		}
+		return False;
 	}
 
 	/**
@@ -210,7 +213,9 @@ class Picovico extends PicovicoBase{
 	function add_text($title = "", $text = ""){
 		if($title OR $text){
 			PicovicoBase::append_text_slide($this->vdd, $title, $text);	
+			return True;
 		}
+		return False;
 	}
 
 	/** 
@@ -221,13 +226,18 @@ class Picovico extends PicovicoBase{
 		if(isset($music_response["id"])){
 			$this->add_library_music($music_response["id"]);
 		}
+		return $music_response;
 	}
 
 	/* 
 	 * Define any previously uploaded music, or any music available from library. 
 	 */
 	function add_library_music($music_id){
-		PicovicoBase::set_music($this->vdd, $music_id);
+		if($music_id){
+			PicovicoBase::set_music($this->vdd, $music_id);
+			return False;
+		}
+		return True;
 	}
 
 	/**
@@ -242,14 +252,22 @@ class Picovico extends PicovicoBase{
 	 * Defines style for the current video project
 	 */
 	function set_style($style_machine_name){
-		$this->vdd["style"] = $style_machine_name;
+		if($style_machine_name){
+			$this->vdd["style"] = $style_machine_name;
+			return True;
+		}
+		return False;
 	}
 
 	/*
 	 * Defines rendering quality for the current video project
 	 */
 	function set_quality($quality){
-		$this->vdd["quality"] = intval($quality);
+		if($quality){
+			$this->vdd["quality"] = intval($quality);
+			return True;
+		}
+		return False;
 	}
 
 	/**
@@ -261,7 +279,9 @@ class Picovico extends PicovicoBase{
 				$this->vdd["credit"] = array();
 			}
 			$this->vdd["credit"][] = array($title, $text);
+			return TRUE;
 		}
+		return False;
 	}
 
 	/**
@@ -269,6 +289,7 @@ class Picovico extends PicovicoBase{
 	 */
 	function remove_credits(){
 		$this->vdd["credit"] = array();
+		return True;
 	}
 
 	/**
@@ -276,6 +297,7 @@ class Picovico extends PicovicoBase{
 	 */
 	function set_callback_url($url){
 		$this->vdd["callback_url"] = $url;
+		return TRUE;
 	}
 
 	/**
