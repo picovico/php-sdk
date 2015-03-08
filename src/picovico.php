@@ -145,6 +145,8 @@ class Picovico extends PicovicoBase{
 			if($picovico_video['status'] === Picovico::VIDEO_INITIAL){
 				$this->video_id = $video_id;
 				$this->vdd =  $picovico_video;
+			}else{
+				return FALSE;
 			}
 		}
 		return $this->vdd;
@@ -355,7 +357,11 @@ class Picovico extends PicovicoBase{
 	* Creates a readable dump of the current project
 	*/
 	function dump(){
-		return $this->vdd;
+		if($this->vdd){
+			return $this->vdd;
+		}else{
+			return false;
+		}
 	}
 }
 

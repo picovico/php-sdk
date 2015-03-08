@@ -85,12 +85,29 @@ fi
 
 __dir__=$(dirname $(readlink -f ${0}) )
 
+function spinner() {
+	PROC=$1
+	count=0
+	while [ -d /proc/$PROC ];do
+		echo -ne "\r${count}\r" ; sleep 0.1
+		(( count++ ))
+		if [ $count -gt 9 ]; then
+			count=0
+		fi
+	done
+}
+
 # invoke the self client for further proceedings
 case "${PICOVICO_SDK}" in 
 	"php" )
-		php "${__dir__}/self-client.php" "${PICOVICO_APP_ID}" "${PICOVICO_APP_SECRET}" "${PICOVICO_DEVICE_ID}" "$@"
+ 		php "${__dir__}/self-client.php" "${PICOVICO_APP_ID}" "${PICOVICO_APP_SECRET}" "${PICOVICO_DEVICE_ID}" "$@" &
+		;;
+	"*" )
+		red SDK ${PICOVICO_SDK} is not available
 		exit
 esac
 
-red SDK ${PICOVICO_SDK} is not available
-
+PID=$!
+spinner $PID
+wait $PID
+exit

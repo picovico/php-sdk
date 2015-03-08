@@ -59,6 +59,7 @@
 		"set-callback-url", "remove-credits", "add-credits", 
 		"set-quality", "set-style", "add-library-music",
 		"reset",
+		"add-music",
 		"add-text", "add-image", "add-library-image");
 
 	$supplement_actions = array("session", "project", "dump");
@@ -119,7 +120,7 @@
 		
 		if(is_stateful_action($action)){
 			if($active_project === NULL){
-				echo "FATAL: Please start project first either with <begin> or <open>.";
+				echo "FATAL: Please start project first either with <begin> or <open>.\n";
 				exit(1);
 			}else{
 				// call method with teh arguments
@@ -151,7 +152,7 @@
 		echo "FATAL: API Exception";
 		echo "\n";
 		echo $e;
-		echo "";
+		echo "\n";
 		exit(2);
 	}
 
@@ -169,7 +170,7 @@
 			raise_exception($e);
 		}
 	}elseif($is_authenticated !== TRUE){
-		echo "FATAL: Autentication required prior to action calls";
+		echo "FATAL: Autentication required prior to action calls\n";
 		exit(1);
 	}elseif(is_supplement_action($action)){
 		$action_response = do_supplement_action();
@@ -197,10 +198,10 @@
 
 	write_history();
 
-	echo json_encode($action_response, JSON_PRETTY_PRINT);
-
-	if(!$action_response){
-		echo "\nNo Response or Invalid Response. Please check your arguments. ";
+	if($action_response === NULL){
+		echo "\nNo Response or Invalid Response. Please check your arguments.";
+	}else{
+		echo json_encode($action_response, JSON_PRETTY_PRINT);
 	}
 
 	echo "\n";
