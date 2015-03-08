@@ -9,31 +9,47 @@ function show_help () {
 	echo "
 	Usage: ./picovico.sh <action> <arg> <arg> ...
 
-	Available actions: 	
-	------------------
-
+	## Authentication actions
+	
 	 * login USERNAME PASSWORD
 	 * authenticate APP_ID APP_SECRET
+	 * set-login-tokens ACCESS_KEY ACCESS_SECRET
+	 * session
+
+	## Account / Profile actions
 	 * profile 
-	 * set-login-tokens ACCESS_KEY	 ACCESS_SECRET
+	
+	## Project actions
 	 * open PROJECT_ID
-	 * begin
-	 * upload-image 
-	 * upload-music
-	 * add-image
-	 * add-library-image
-	 * add-text
-	 * add-music
-	 * add-library-music
-	 * get-styles
-	 * set-style
+	 * begin TITLE QUALITY
 	 * set-quality
-	 * add-credits
-	 * remove-credits
 	 * set-callback-url
 	 * save
 	 * preview
 	 * create	
+	 * reset
+	 * project
+
+	## Image actions
+	 * upload-image 
+	 * add-image
+	 * add-library-image
+
+	## Music actions
+	 * upload-music
+	 * add-music
+	 * add-library-music
+
+	## Text actions
+	 * add-text
+
+	## Style actions
+	 * get-styles
+	 * set-style
+
+	## Credit actions
+	 * add-credits
+	 * remove-credits
 	"
 }
 
