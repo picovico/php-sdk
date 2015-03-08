@@ -147,7 +147,7 @@ class Picovico extends PicovicoBase{
 				$this->vdd =  $picovico_video;
 			}
 		}
-		return $this->video_id;
+		return $this->vdd;
 	}
 
 	/**
@@ -340,6 +340,22 @@ class Picovico extends PicovicoBase{
 		$response = $this->save();
 		$url = sprintf(PicovicoUrl::create_video, $this->video_id);
 		return $this->request->post($url);
+	}
+
+	function reset(){
+		PicovicoBase::reset_music($this->vdd);
+		PicovicoBase::reset_slides($this->vdd);
+		$this->remove_credits();
+		$this->vdd["style"] = NULL;
+		$this->vdd["quality"] = NULL;
+		return $this->vdd;
+	}
+
+	/**
+	* Creates a readable dump of the current project
+	*/
+	function dump(){
+		return $this->vdd;
 	}
 }
 
