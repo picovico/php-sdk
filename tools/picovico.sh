@@ -67,10 +67,12 @@ if [ "$env_missing" == "1" ]; then
 	exit
 fi
 
+__dir__=$(dirname $(readlink -f ${0}) )
+
 # invoke the self client for further proceedings
 case "${PICOVICO_SDK}" in 
 	"php" )
-		php "./self-client.php" "${PICOVICO_APP_ID}" "${PICOVICO_APP_SECRET}" "${PICOVICO_DEVICE_ID}" "$@"
+		php "${__dir__}/self-client.php" "${PICOVICO_APP_ID}" "${PICOVICO_APP_SECRET}" "${PICOVICO_DEVICE_ID}" "$@"
 		exit
 esac
 
