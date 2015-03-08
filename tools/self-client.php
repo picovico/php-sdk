@@ -58,7 +58,10 @@
 	$stateful = array("save", "preview", "create", 
 		"set-callback-url", "remove-credits", "add-credits", 
 		"set-quality", "set-style", "add-library-music",
+		"reset",
 		"add-text", "add-image", "add-library-image");
+
+	$supplement_actions = array("session", "project", "dump");
 
 	function is_stateful_action($action){
 		global $stateful;
@@ -74,11 +77,36 @@
 		return is_stateless_action($action) OR is_stateful_action($action);
 	}
 
+	function is_supplement_action($action){
+		global $supplement_actions;
+		return in_array($action, $supplement_actions);
+	}
+
 	function do_auth_action(){
 		global $action_function;
 		global $client_arguments;
 		global $client;
 		return call_user_func_array(array($client, $action_function),  $client_arguments);
+	}
+
+	function do_supplement_action(){
+		global $action;
+		global $action_function;
+		global $history;
+		global $client;
+		switch ($action) {
+			case 'session':
+				# code...
+				$response_message = $history["session"];
+				unset($response_message["object"]);
+				return $response_message;
+				break;
+			case "project":
+			case "dump":
+				#
+				return $client->dump();
+				break;
+		}
 	}
 
 	function do_other_action(){
@@ -143,13 +171,19 @@
 	}elseif($is_authenticated !== TRUE){
 		echo "FATAL: Autentication required prior to action calls";
 		exit(1);
-	}else{
+	}elseif(is_supplement_action($action)){
+		$action_response = do_supplement_action();
+	}
+	elseif(is_valid_action($action)){
 		try{
 			$action_response = do_other_action();
 		}catch(Exception $e){
 			write_history();
 			raise_exception($e);
 		}
+	}else{
+		echo "ERROR: Invalid action\n";
+		exit(3);
 	}
 
 	if($action == "begin" OR $action == "open"){
