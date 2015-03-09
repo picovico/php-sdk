@@ -165,4 +165,12 @@ class PicovicoBase {
             unset($vdd["_music"]);
         }
     }
+
+    protected static function reset_slides(&$vdd){
+        $vdd["assets"] = array();
+    }
+
+    protected static function reset_music(&$vdd){
+        unset($vdd["_music"]);
+    }
 }

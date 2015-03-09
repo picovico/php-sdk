@@ -34,6 +34,9 @@ Picovico 2.0, the latest version of Picovico, which has been re-engineered and r
 * `get` - request information about any previously existing video (Is available for editing after `open()` only)
 * `save` - save the video progress (automatically saved before creating)
 * `create` - request to render the video.
+* `preview` - send a request to generate preview quality video
+* `reset` - reset the project progress (resets the slides, quality, credits, style)
+* `dump` - returns the local progress with active project
 
 ## Example Walkthrough
 [examples/README.md](examples/README.md)

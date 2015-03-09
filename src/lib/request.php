@@ -57,7 +57,7 @@ class PicovicoRequest{
     }
 
     public function delete($url, $params  = array(), $headers = array()){
- 		return $this->make_request($url, $params, $headers, PicovicoRequest::DELETE);
+	return $this->make_request($url, $params, $headers, PicovicoRequest::DELETE);
     }
 
     public function make_request($url, $params = array(), $headers = array(), $method = PicovicoRequest::GET, $include_access_headers = PicovicoRequest::AUTHORIZED) {
