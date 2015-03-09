@@ -47,7 +47,7 @@ require_once __DIR__."/lib/utils.php";
 class Picovico extends PicovicoBase{
 
     const API_VERSION = '2.1';
-    const VERSION = '2.0.5';
+    const VERSION = '2.0.7';
     const API_SERVER = 'api.picovico.com';
 
     /** Available Video rendering states */
