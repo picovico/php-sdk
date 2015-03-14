@@ -40,3 +40,31 @@ Picovico 2.0, the latest version of Picovico, which has been re-engineered and r
 
 ## Example Walkthrough
 [examples/README.md](examples/README.md)
+
+## Commandline Usage
+A built-in commandline client `picovico.sh` is available under tools directory. The client is designed such that it provides a bash port to a self-client written using this SDK.
+It provides all methods as above, except the underscores are replaced with hyphens.
+
+Plus few more actions are specified.
+
+### Usage
+```$ picovico login
+```
+
+```$ picovico authenticate
+```
+
+```$ picovico add-image
+```
+
+
+## Installation
+Picovico PHP-SDK is available on [Packagist](https://packagist.org/packages/picovico/php-sdk) via [composer](https://getcomposer.org)
+
+```{
+    "require": {
+        "picovico/php-sdk": "dev-master"
+    }
+}
+```
+
