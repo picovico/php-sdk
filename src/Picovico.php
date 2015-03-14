@@ -61,7 +61,7 @@ class Picovico extends PicovicoBase{
     const Q_720P = 720; // md
     const Q_1080P = 1080; // hd
 
-    const STANDARD_SLIDE_DURATION = 5;
+    const STANDARD_SLIDE_DURATION = 2;
 
     // Video Data for the final video request
     private $vdd = NULL;
