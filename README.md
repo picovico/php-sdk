@@ -13,6 +13,16 @@ Picovico 2.0, the latest version of Picovico, which has been re-engineered and r
 ##Author
 [picovico.com](http://picovico.com/)
 
+## Getting Started
+Picovico PHP-SDK is available on [Packagist](https://packagist.org/packages/picovico/php-sdk) via [composer](https://getcomposer.org)
+```
+{
+    "require": {
+        "picovico/php-sdk": "dev-master"
+    }
+}
+```
+
 ##Functions Overview
 * `login` - Login with username and password
 * `authenticate` - Login with app_id and app_secret (API version 2.1 or above required)
@@ -41,30 +51,55 @@ Picovico 2.0, the latest version of Picovico, which has been re-engineered and r
 ## Example Walkthrough
 [examples/README.md](examples/README.md)
 
-## Commandline Usage
-A built-in commandline client `picovico.sh` is available under tools directory. The client is designed such that it provides a bash port to a self-client written using this SDK.
-It provides all methods as above, except the underscores are replaced with hyphens.
+## Command-line Usage
+A built-in command-line client `picovico.sh` is available under tools directory. The client is designed such that it provides a bash port to a self-client written using this SDK.
+It provides all methods as above, except the `underscores` are replaced with `hyphens`.
 
 Plus few more actions are specified.
 
 ### Usage
-```$ picovico login
+####Syntax:
+
+````
+$ picovico <action> <arg> <arg> ...
+````
+
+#### Common examples
+```
+$ picovico login
 ```
 
-```$ picovico authenticate
+```
+$ picovico authenticate
 ```
 
-```$ picovico add-image
+```
+$ picovico add-image
 ```
 
+#### Extra actions available from command-line
 
-## Installation
-Picovico PHP-SDK is available on [Packagist](https://packagist.org/packages/picovico/php-sdk) via [composer](https://getcomposer.org)
+Current cli session
+```
+$ picovico session
+```
 
-```{
-    "require": {
-        "picovico/php-sdk": "dev-master"
-    }
-}
+Current project from cli
+```
+$ picovico project
+```
+
+#### Authenticating in the command-line
+The cli version requires following environment variables to set with the values obtained from your account.
+ - PICOVICO_APP_ID
+ - PICOVICO_APP_SECRET
+ - PICOVICO_SDK
+
+for example in `~/.bashrc`
+
+```
+export PICOVICO_APP_ID=<some-app-id>
+export PICOVICO_APP_SECRET=<some-app-secret>
+export PICOVICO_SDK=php
 ```
 
