@@ -2,19 +2,26 @@
     "name": "picovico/php-sdk",
     "type": "library",
     "description": "Official PHP SDK from Picovico",
-    "keywords": ["Picovico", "API", "Video Maker", "Slideshow Maker"],
+    "keywords": [
+        "Picovico",
+        "API",
+        "Video Maker",
+        "Slideshow Maker"
+    ],
     "homepage": "http://github.com/picovico/php-sdk",
     "license": "MIT",
-    "authors": [[{
-        "name": "Picovico Inc.",
-        "email": "picovico@picovico.com",
-        "homepage": "http://picovico.com"
-    }, {
-        "name": "acpmasquerade",
-        "email": "acpmasquerade@gmail.com",
-        "homepage": "http://acpmasquerade.com"
-    }
-	],
+    "authors": [
+        {
+            "name": "Picovico Inc.",
+            "email": "picovico@picovico.com",
+            "homepage": "http://picovico.com"
+        },
+        {
+            "name": "acpmasquerade",
+            "email": "acpmasquerade@gmail.com",
+            "homepage": "http://acpmasquerade.com"
+        }
+    ],
     "require": {
         "php": ">=5.3.0"
     },
