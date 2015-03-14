@@ -1,0 +1,5 @@
+{
+    "require": {
+        "picovico/php-sdk": "dev-master"
+    }
+}
