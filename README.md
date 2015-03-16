@@ -64,6 +64,9 @@ Plus few more actions are specified.
 $ picovico <action> <arg> <arg> ...
 ````
 
+#### Bash Autocomplete
+copy `tools/bash_completion.d/picovico` to `/etc/bash_completion.d/picovico`
+
 #### Common examples
 ```
 $ picovico login
