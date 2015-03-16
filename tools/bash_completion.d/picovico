@@ -1,0 +1,23 @@
+# bash completion for picovico cli
+
+# Available actions are 
+# login authenticate set-login-tokens session profile 
+# open begin set-quality set-callback-url save preview create 
+# reset project upload-image add-image add-library-image 
+# upload-music add-music add-library-music add-text 
+# get-styles set-style add-credits remove-credits
+
+_picovico() {
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="login authenticate set-login-tokens session profile  open begin set-quality set-callback-url save preview create reset project upload-image add-image add-library-image upload-music add-music add-library-music add-text get-styles set-style add-credits remove-credits"
+
+    if [[ ${cur} == * ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" ${cur}) )
+        return 0
+    fi
+}
+
+complete -F _picovico picovico
