@@ -15,6 +15,7 @@ function show_help () {
 	 * authenticate APP_ID APP_SECRET
 	 * set-login-tokens ACCESS_KEY ACCESS_SECRET
 	 * session
+	 * logout
 
 	## Account / Profile actions
 	 * profile 
