@@ -3,7 +3,7 @@
 	error_reporting(0);
 	define("PICOVICO_DEBUG", false);
 
-	include __DIR__."/../src/picovico.php";
+	include __DIR__."/../src/Picovico.php";
 
 	$app_id = $argv[1];
 	$app_secret = $argv[2];
