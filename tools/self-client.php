@@ -47,7 +47,7 @@
 		exit(1);
 	}
 
-	$authactions = array("login", "authenticate", "set-login-tokens");
+	$authactions = array("login", "authenticate", "set-login-tokens", "logout");
 
 	$stateless = array("login", 
 		"authenticate", 
@@ -84,10 +84,18 @@
 	}
 
 	function do_auth_action(){
+		global $action;
 		global $action_function;
 		global $client_arguments;
 		global $client;
-		return call_user_func_array(array($client, $action_function),  $client_arguments);
+
+		if ($action == "logout"){
+			clear_history();
+			echo "true\n";
+			exit(0);
+		}else{
+			return call_user_func_array(array($client, $action_function),  $client_arguments);
+		}
 	}
 
 	function do_supplement_action(){
@@ -146,6 +154,14 @@
 
 		$history["session"]["object"] = serialize($client);
 		file_put_contents($history_file, json_encode($history, JSON_PRETTY_PRINT));
+	}
+
+	function clear_history(){
+		global $history;
+		global $history_file;
+		$history = array();
+		file_put_contents($history_file, json_encode($history, JSON_PRETTY_PRINT));
+		return True;
 	}
 
 	function raise_exception($e){
