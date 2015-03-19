@@ -344,6 +344,19 @@ class Picovico extends PicovicoBase{
 		return $this->request->post($url);
 	}
 
+	/** Duplicates any video and saves it to the new draft or overwrites if any exists */
+	function duplicate($video_id){
+		$url = sprintf(PicovicoUrl::duplicate_video, $video_id);
+		return $this->request->post($url);
+	}
+
+	/** Gets a list of last 15 videos */
+	function get_videos(){
+		$url = PicovicoUrl::get_videos;
+		return $this->request->get($url);
+	}
+
+	/* Resets the current local progress */
 	function reset(){
 		PicovicoBase::reset_music($this->vdd);
 		PicovicoBase::reset_slides($this->vdd);
@@ -351,6 +364,12 @@ class Picovico extends PicovicoBase{
 		$this->vdd["style"] = NULL;
 		$this->vdd["quality"] = NULL;
 		return $this->vdd;
+	}
+
+	/** Returns the current draft saved */
+	function draft(){
+		$url = PicovicoUrl::get_draft;
+		return $this->request->get($url);
 	}
 
 	/**
