@@ -30,6 +30,8 @@ function show_help () {
 	 * create	
 	 * reset
 	 * project
+	 * duplicate
+	 * draft
 
 	## Image actions
 	 * upload-image 

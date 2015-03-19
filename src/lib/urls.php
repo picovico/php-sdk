@@ -12,6 +12,8 @@ class PicovicoUrl{
 	const save_video = "me/videos/%s";
 	const preview_video = "me/videos/%s/preview";
 	const create_video = "me/videos/%s/render";
+	const duplicate_video = "me/videos/%s/duplicate";
+	const get_draft = "me/draft";
 
 	const get_musics = "me/musics";
 	const upload_music = "me/musics";

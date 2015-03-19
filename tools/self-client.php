@@ -53,6 +53,9 @@
 		"authenticate", 
 		"profile", "set-login-tokens", "open", 
 		"begin", "upload-image", 
+		"get-videos",
+		"duplicate", 
+		"draft",
 		"upload-music", "get-styles", "get");
 
 	$stateful = array("save", "preview", "create", 
