@@ -47,8 +47,9 @@ require_once __DIR__."/lib/utils.php";
 class Picovico extends PicovicoBase{
 
     const API_VERSION = '2.1';
-    const VERSION = '2.0.7';
+    const VERSION = '2.0.8';
     const API_SERVER = 'api.picovico.com';
+    const API_SCHEME = 'https';
 
     /** Available Video rendering states */
     const VIDEO_INITIAL = "initial";
@@ -145,6 +146,13 @@ class Picovico extends PicovicoBase{
 			if($picovico_video['status'] === Picovico::VIDEO_INITIAL){
 				$this->video_id = $video_id;
 				$this->vdd =  $picovico_video;
+				
+				// required due to the type incompatibility.
+				$quality_cleanups = array();
+				foreach($this->vdd["quality"] as $some_quality){
+					$quality_cleanups[] = intval($some_quality);
+				}
+				$this->vdd["quality"] = max($quality_cleanups);
 			}else{
 				return FALSE;
 			}
@@ -210,6 +218,20 @@ class Picovico extends PicovicoBase{
 	}
 
 	/**
+	* List of uploaded / purchased musics
+	*/
+	function get_musics(){
+		return $this->request->get(PicovicoUrl::get_musics);
+	}
+
+	/**
+	* List of Available Musics in the Picovico library
+	*/
+	function get_library_musics(){
+		return $this->request->get(PicovicoUrl::get_library_musics);
+	}
+
+	/**
 	 * Append text slide to the project
 	 */
 	function add_text($title = "", $text = ""){
@@ -243,11 +265,23 @@ class Picovico extends PicovicoBase{
 	}
 
 	/**
+	* Delete music from your library
+	*/
+	function delete_music($music_id){
+		if($music_id){
+			$url = sprintf(PicovicoUrl::delete_music, $music_id);
+			return $this->request->delete($url);
+		}else{
+			return False;
+		}
+	}
+
+	/**
 	 * Fetches styles available for the logged in account
 	 */
 	function get_styles(){
 		$url = sprintf(PicovicoUrl::get_styles);
-		return $this->request->get($url, NULL, NULL, PicovicoRequest::GET, PicovicoRequest::AUTHORIZED);
+		return $this->request->make_request($url, NULL, NULL, PicovicoRequest::GET, PicovicoRequest::AUTHORIZED);
 	}
 
 	/**
