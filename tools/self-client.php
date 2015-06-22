@@ -4,7 +4,17 @@
 	define("PICOVICO_DEBUG", false);
 
 	include __DIR__."/../src/Picovico.php";
+	include __DIR__."/includes/functions.php";
+	include __DIR__."/includes/actions.php";
 
+	/** @TODO
+		* Create a CLIENT Class and refactor accordingly
+		* Move all the variables inside the class scope.
+		* Get rid of global variables wherever possible.
+		**/
+
+	// $argv used before identifying actions.
+	// client_arguments used afterwise. 
 	$app_id = $argv[1];
 	$app_secret = $argv[2];
 	$device_id = $argv[3];
@@ -28,6 +38,7 @@
 		$client = new Picovico($app_id, $app_secret, $device_id);
 	}
 
+	// Remove all prepends and use the remaining arguments. 
 	$client_arguments = array_splice($argv, 5);
 
 	if(isset($history["session"]["video_id"])){
@@ -47,136 +58,8 @@
 		exit(1);
 	}
 
-	$authactions = array("login", "authenticate", "set-login-tokens", "logout");
-
-	$stateless = array("login", 
-		"authenticate", 
-		"profile", "set-login-tokens", "open", 
-		"begin", "upload-image", 
-		"get-videos",
-		"duplicate", 
-		"draft",
-		"upload-music", "get-styles", "get");
-
-	$stateful = array("save", "preview", "create", 
-		"set-callback-url", "remove-credits", "add-credits", 
-		"set-quality", "set-style", "add-library-music",
-		"reset",
-		"add-music",
-		"add-text", "add-image", "add-library-image");
-
-	$supplement_actions = array("session", "project", "dump");
-
-	function is_stateful_action($action){
-		global $stateful;
-		return in_array($action, $stateful);
-	}
-
-	function is_stateless_action($action){
-		global $stateless;
-		return in_array($action, $stateless);
-	}
-
-	function is_valid_action($action){
-		return is_stateless_action($action) OR is_stateful_action($action);
-	}
-
-	function is_supplement_action($action){
-		global $supplement_actions;
-		return in_array($action, $supplement_actions);
-	}
-
-	function do_auth_action(){
-		global $action;
-		global $action_function;
-		global $client_arguments;
-		global $client;
-
-		if ($action == "logout"){
-			clear_history();
-			echo "true\n";
-			exit(0);
-		}else{
-			return call_user_func_array(array($client, $action_function),  $client_arguments);
-		}
-	}
-
-	function do_supplement_action(){
-		global $action;
-		global $action_function;
-		global $history;
-		global $client;
-		switch ($action) {
-			case 'session':
-				# code...
-				$response_message = $history["session"];
-				unset($response_message["object"]);
-				return $response_message;
-				break;
-			case "project":
-			case "dump":
-				#
-				return $client->dump();
-				break;
-		}
-	}
-
-	function do_other_action(){
-		global $active_project;
-		global $action;
-		global $action_function;
-
-		global $client;
-		global $client_arguments;
-		
-		if(is_stateful_action($action)){
-			if($active_project === NULL){
-				echo "FATAL: Please start project first either with <begin> or <open>.\n";
-				exit(1);
-			}else{
-				// call method with teh arguments
-				return  call_user_func_array(array($client, $action_function),  $client_arguments);
-			}
-		}else{
-			return call_user_func_array(array($client, $action_function),  $client_arguments);
-		}
-	}
-
-	function write_history(){
-		global $history;
-		global $history_file;
-		global $client;
-		global $client_arguments;
-		global $action;
-
-		global $action_response;
-
-		$history["action"] = $action;
-		$history["args"] = $client_arguments;
-		$history["response"] = $action_response;
-
-		$history["session"]["object"] = serialize($client);
-		file_put_contents($history_file, json_encode($history, JSON_PRETTY_PRINT));
-	}
-
-	function clear_history(){
-		global $history;
-		global $history_file;
-		$history = array();
-		file_put_contents($history_file, json_encode($history, JSON_PRETTY_PRINT));
-		return True;
-	}
-
-	function raise_exception($e){
-		echo "FATAL: API Exception";
-		echo "\n";
-		echo $e;
-		echo "\n";
-		exit(2);
-	}
-
 	// authenticate and save the history
-	if(in_array($action, $authactions)){
+	if(is_auth_action($action)){
 		try{
 			$action_response = do_auth_action();
 			$history["session"]["authenticated"] = true;
@@ -193,8 +76,7 @@
 		exit(1);
 	}elseif(is_supplement_action($action)){
 		$action_response = do_supplement_action();
-	}
-	elseif(is_valid_action($action)){
+	}elseif(is_valid_action($action)){
 		try{
 			$action_response = do_other_action();
 		}catch(Exception $e){
