@@ -18,6 +18,8 @@ class PicovicoUrl{
 	const get_musics = "me/musics";
 	const upload_music = "me/musics";
 	const single_music = "me/musics/%s";
+	const get_library_musics = "musics";
+	const delete_music = "me/musics/%s";
 
 	const upload_photo = "me/photos";
 	const get_photos = "me/photos";

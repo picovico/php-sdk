@@ -9,6 +9,9 @@ $stateless_actions = array("login",
     "begin", "upload-image", 
     "get-videos",
     "duplicate", 
+    "get-musics",
+    "get-library-musics",
+    "delete-music",
     "draft",
     "upload-music", "get-styles", "get");
 
