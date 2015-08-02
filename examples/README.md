@@ -19,7 +19,7 @@ include 'src/picovico.php';
 $app = new Picovico();
 $app->authenticate('PICOVICO_APP_ID', 'PICOVICO_APP_SECRET');
 // use login method to login directly with username and password (not recommended though)
-//$app->login('PICOVICO_USERNAME', 'PICOVICO_PASSWORD');
+// $app->login('PICOVICO_USERNAME', 'PICOVICO_PASSWORD');
 $project_id = $app->begin('Hello World');
 $app->set_style('vanilla');
 $app->add_text('Hello World', 'Let\'s Picovico');
