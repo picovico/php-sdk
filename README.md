@@ -29,9 +29,9 @@ Picovico PHP-SDK is available on [Packagist](https://packagist.org/packages/pico
 * `set_login_tokens` - Set authentication tokens if saved earlier
 * `open` - open any existing video project
 * `begin` - begin with a new video project
-* `upload_image` - upload local or remote image. (remote content is not downloaded locally)
-* `upload_music` - upload local or remote music. (remote content is not downloaded locally)
-* `add_image` - append image as next slide
+* `upload_image` - upload local or remote image. (remote content is not downloaded locally. 250 chars max for remote content)
+* `upload_music` - upload local or remote music. (remote content is not downloaded locally. 250 chars max for remote content)
+* `add_image` - append image as next slide - (Uploads first, then adds to the project. No need to call upload_image if this function is used)
 * `add_library_image` - append previouosly uploaded image as next slide
 * `add_text` - append text as next slide
 * `add_music` - define background music
