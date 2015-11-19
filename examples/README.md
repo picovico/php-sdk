@@ -16,8 +16,8 @@ The official PHP SDK supports following API features
 ```php
 <?php
 include 'src/Picovico.php';
-$app = new Picovico();
-$app->authenticate('PICOVICO_APP_ID', 'PICOVICO_APP_SECRET');
+$app = new Picovico('PICOVICO_APP_ID', 'PICOVICO_APP_SECRET', 'PICOVICO_DEVICE_ID');
+$app->authenticate();
 // use login method to login directly with username and password (not recommended though)
 // $app->login('PICOVICO_USERNAME', 'PICOVICO_PASSWORD');
 $project_id = $app->begin('Hello World');
