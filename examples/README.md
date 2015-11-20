@@ -57,9 +57,9 @@ $project_assets = array();
 $project_assets[] = array("text", "Hello World", "Let's Picovico");
 $r = $app->upload_image('http://s3-us-west-2.amazonaws.com/pv-styles/christmas/pv_christmas_winter_themes.png', "hosted");
 $project_assets[] = array("image", $r["id"], "some-caption-if-required");
-$project_assets[] = array("text", "Thank You", "Namaste");
 $r = $app->upload_image('http://s3.amazonaws.com/pvcdn2/video/8501d6865c2d484abb2e8a858cffca80/8501d6865c2d484abb2e8a858cffca80-360.jpg', "hosted");
 $project_assets[] = array("image", $r["id"], "some-caption-if-required");
+$project_assets[] = array("text", "Thank You", "Namaste");
 // .... begin the project now ...
 $project_id = $app->begin('Hello World'); 
 $r = $app->set_style('vanilla');
