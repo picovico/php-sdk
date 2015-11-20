@@ -17,24 +17,35 @@ The official PHP SDK supports following API features
 <?php
 include 'src/Picovico.php';
 $app = new Picovico('PICOVICO_APP_ID', 'PICOVICO_APP_SECRET', 'PICOVICO_DEVICE_ID');
-$app->authenticate();
+$r = $app->authenticate();
+  print_r($r);
 // use login method to login directly with username and password (not recommended though)
 // $app->login('PICOVICO_USERNAME', 'PICOVICO_PASSWORD');
-$project_id = $app->begin('Hello World');
-$app->set_style('vanilla');
-$app->add_text('Hello World', 'Let\'s Picovico');
-$app->add_image('http://s3-us-west-2.amazonaws.com/pv-styles/christmas/pv_christmas_winter_themes.png');
-$app->add_image('http://s3.amazonaws.com/pvcdn2/video/8501d6865c2d484abb2e8a858cffca80/8501d6865c2d484abb2e8a858cffca80-360.jpg', 'Image captions are optional');
-$app->add_image('http://www.picovico.com/blog/wp-content/uploads/2014/12/Yearbook-Screenshot.jpg');
-$app->add_music('http://s3.amazonaws.com/picovico-1/assets/music/Latin/Latinish.mp3');
-$app->add_credits('Music', 'Frank Nora');
-$app->set_quality(Picovico::Q_360P);
-$app->create();
+$project_id = $app->begin('Hello World'); 
+  print_r($project_id);
+$r = $app->set_style('vanilla');
+  print_r($r);
+$r = $app->add_text('Hello World', 'Let\'s Picovico');
+  print_r($r);
+$r = $app->add_image('http://s3-us-west-2.amazonaws.com/pv-styles/christmas/pv_christmas_winter_themes.png');
+  print_r($r);
+$r = $app->add_image('http://s3.amazonaws.com/pvcdn2/video/8501d6865c2d484abb2e8a858cffca80/8501d6865c2d484abb2e8a858cffca80-360.jpg', 'Image captions are optional');
+  print_r($r);
+$r = $app->add_text("Thank You", "Namaste!!!");
+  print_r($r);
+$r = $app->add_music('http://s3.amazonaws.com/picovico-1/assets/music/Latin/Latinish.mp3');
+  print_r($r);
+$r = $app->add_credits('Music', 'Frank Nora');
+  print_r($r);
+$r = $app->set_quality(Picovico::Q_360P);
+  print_r($r);
+$r = $app->create();
+  print_r($r);
 ```
 
 Use the project_id saved earlier to check status of your video
 ```php
-$app->get($project_id);
+$r = $app->get($project_id);
 ```
 
 
