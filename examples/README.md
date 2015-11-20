@@ -48,4 +48,37 @@ Use the project_id saved earlier to check status of your video
 $r = $app->get($project_id);
 ```
 
-
+## Alternate Implementation
+Because Picovico API allows to create ONLY ONE Draft per account, its good to upload assets / music before creating the project.
+```php
+<?php
+/// ... authentication steps as above ... 
+$project_assets = array();
+$r = $app->upload_image('http://s3-us-west-2.amazonaws.com/pv-styles/christmas/pv_christmas_winter_themes.png', "hosted");
+  print_r($r);
+  $project_assets[] = array("image", $r["id"], "some-caption-if-required");
+// if texts
+$project_assets[] = array("text", "Hello World", "Let's Picovico");
+$project_assets[] = array("text", "Thank You", "Namaste");
+$r = $app->upload_image('http://s3.amazonaws.com/pvcdn2/video/8501d6865c2d484abb2e8a858cffca80/8501d6865c2d484abb2e8a858cffca80-360.jpg', "hosted");
+  print_r($r);
+  $project_assets[] = array("image", $r["id"], "some-caption-if-required");
+// .... begin the project now ...
+$project_id = $app->begin('Hello World'); 
+  print_r($project_id);
+$r = $app->set_style('vanilla');
+  print_r($r);
+foreach($project_assets as $some_asset){
+  if($some_asset[0] == "image"){ $app->add_library_image($some_asset[1], $some_asset[2]); }
+  elseif($some_asset[1] == "text"){ $app->add_text($some_asset[1], $some_asset[2]); }
+  else{ // .. some invalid asset. please see if the type is either text or image }
+}
+$r = $app->add_library_music('NhLIs');
+  print_r($r);
+$r = $app->add_credits('Music', 'Sunshine (Kevin MacLeod)');
+  print_r($r);
+$r = $app->set_quality(Picovico::Q_360P);
+  print_r($r);
+$r = $app->create();
+  print_r($r);
+```
