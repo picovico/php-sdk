@@ -65,8 +65,10 @@ $project_id = $app->begin('Hello World');
 $r = $app->set_style('vanilla');
 foreach($project_assets as $some_asset){
   if($some_asset[0] == "image"){ $app->add_library_image($some_asset[1], $some_asset[2]); }
-  elseif($some_asset[1] == "text"){ $app->add_text($some_asset[1], $some_asset[2]); }
-  else{ // .. some invalid asset. please see if the type is either text or image }
+  elseif($some_asset[0] == "text"){ $app->add_text($some_asset[1], $some_asset[2]); }
+  else{ 
+    // .. some invalid asset. please see if the type is either text or image 
+  }
 }
 $r = $app->add_library_music('NhLIs');
 $r = $app->add_credits('Music', 'Sunshine (Kevin MacLeod)');
