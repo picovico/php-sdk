@@ -33,7 +33,7 @@ $r = $app->add_image('http://s3.amazonaws.com/pvcdn2/video/8501d6865c2d484abb2e8
   print_r($r);
 $r = $app->add_text("Thank You", "Namaste!!!");
   print_r($r);
-$r = $app->add_music('http://s3.amazonaws.com/picovico-1/assets/music/Latin/Latinish.mp3');
+$r = $app->add_music('https://s3-us-west-2.amazonaws.com/pv-audio-library/free-music/preview/Latin/Latinish.mp3');
   print_r($r);
 $r = $app->add_credits('Music', 'Frank Nora');
   print_r($r);
