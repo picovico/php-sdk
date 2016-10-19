@@ -48,7 +48,7 @@ Use the project_id saved earlier to check status of your video
 $r = $app->get($project_id);
 ```
 
-## Alternate Implementation
+## RECOMMENDED Implementation
 Because Picovico API allows to create ONLY ONE Draft per account, its good to upload assets / music before creating the project.
 ```php
 <?php
