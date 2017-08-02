@@ -23,7 +23,7 @@ Picovico PHP-SDK is available on [Packagist](https://packagist.org/packages/pico
 }
 ```
 
-##Functions Overview
+## Functions Overview
 * `authenticate` - Login with app_id and app_secret (API version 2.7 or above required)
 * `text_slide` - build JSON for text slide
 * `image_slide` - build JSON for image slide (URL)
