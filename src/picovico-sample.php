@@ -29,6 +29,12 @@ class Picovico{
         $curl_request_url = implode("/", [self::api_endpoint, self::api_version, $url]);
 
         $method = strtoupper($method); # uppercase method. just in case
+
+        $curl_options[CURLOPT_CUSTOMREQUEST] = $method;
+        if($method === "PUT"){
+            $curl_options[CURLOPT_PUT] = True;
+        }
+        
         $content_type = isset($curl_headers['Content-Type']) ? $curl_headers['Content-Type'] : null;
         if($content_type === "application/json"){
             $payload = json_encode($args);
@@ -136,26 +142,33 @@ $pv->authenticate();
 # build the video JSON
 $payload = [
     "style" => "vanilla_frameless",
-    "quality" => 480,
+    "quality" => 360,
     "name" => "Sample Video",
     "aspect_ratio" => "16:9",
     "assets" => [
-        "music" => [
-            "asset_id" => "aud_6j44J9zjbSQe54ZTTSqUj2"
-            # "url" => ".... some url ..."
-        ],
-        "frames" => [
-            // $pv->text_slide("aasdfasd", "basdfasd"),
-            // $pv->text_slide("casdfa", "dasdfasd"),
-            // $pv->text_slide("asdfasde", "fasdfasd"),
-            // $pv->text_slide("asdfasde", "fasdfasd"),
-            $pv->image_slide("https://images.unsplash.com/photo-1481326086332-e77dd61a4ea1"),
-            $pv->image_slide("https://images.unsplash.com/photo-1481326086332-e77dd61a4ea1"),
-            $pv->image_slide("https://images.unsplash.com/photo-1481326086332-e77dd61a4ea1"),
-            $pv->image_slide("https://images.unsplash.com/photo-1481326086332-e77dd61a4ea1")            
+        [
+            "music" => [
+                "asset_id" => "aud_6j44J9zjbSQe54ZTTSqUj2"
+                # "url" => ".... some url ..."
+            ],
+            "frames" => [
+                $pv->text_slide("You are", "my love"),
+                $pv->text_slide("You are", "CSS to my HTML"),
+                $pv->image_slide("https://images.unsplash.com/photo-1481326086332-e77dd61a4ea1"),
+                $pv->text_slide("You", "make me complete")
+            ]
         ]
     ]
 ];
 
-$response = $pv->authenticated_api("POST", "me/videos", $payload, ["Content-Type"=>"application/json"]);
-print_r($response);
+list($status, $code, $response) = $pv->authenticated_api("POST", "me/videos", $payload, ["Content-Type"=>"application/json"]);
+if($status){
+    $video_id = $response['data'][0]['id'];
+    # preview
+    // $pv->authenticated_api("PUT", "me/videos/{$video_id}", ["preview"=>1]);
+    # render
+    $responses = $pv->authenticated_api("PUT", "me/videos/{$video_id}");
+    print_r($responses);
+}else{
+    print_r($response);
+}
