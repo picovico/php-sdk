@@ -13,7 +13,7 @@ Picovico 3.0, the latest version of Picovico. Picovico 3.x provides wide range o
 ## Author
 [picovico.com](http://picovico.com/)
 
-## Getting Started
+## Getting Started (Composer not available yet)
 Picovico PHP-SDK is available on [Packagist](https://packagist.org/packages/picovico/php-sdk) via [composer](https://getcomposer.org)
 ```
 {
