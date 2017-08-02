@@ -1,7 +1,7 @@
 {
     "name": "picovico/php-sdk",
     "type": "library",
-    "description": "Official PHP SDK from Picovico",
+    "description": "Picovico3 Official PHP SDK",
     "keywords": [
         "Picovico",
         "API",
@@ -9,7 +9,7 @@
         "Slideshow Maker"
     ],
     "homepage": "http://github.com/picovico/php-sdk",
-    "license": "MIT",
+    "license": "Apache",
     "authors": [
         {
             "name": "Picovico",
