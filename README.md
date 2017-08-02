@@ -7,10 +7,10 @@ Picovico 3.0, the latest version of Picovico. Picovico 3.x provides wide range o
 ## API Version
 2.7
 
-##API Documentation
+## API Documentation
 [picovico.readthedocs.org](http://picovico.readthedocs.org)
 
-##Author
+## Author
 [picovico.com](http://picovico.com/)
 
 ## Getting Started
