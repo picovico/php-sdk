@@ -1,12 +1,13 @@
 <?php
 
 require __DIR__."/lib3.php";
+use \Picovico\Lib3 as Picovico;
 
 # initialize and authenticate
 $app_id = getenv("PV_2017_APP_ID");
 $app_secret = getenv("PV_2017_APP_SECRET");
 $device_id = getenv("PV_2017_DEVICE_ID");
-$pv = new \Picovico\Lib3($app_id, $app_secret, $device_id);
+$pv = new Picovico($app_id, $app_secret, $device_id);
 $pv->authenticate();
 
 # build the video JSON
