@@ -1,7 +1,7 @@
-#Picovico - Official PHP SDK
+# Picovico - Official PHP SDK
 Picovico is a online video creating platform.
 
-##Picovico 3.0
+## Picovico 3.0
 Picovico 3.0, the latest version of Picovico. Picovico 3.x provides wide range of features including video clips, multiple audio, custom logo, vertical, squre videos etc. 
 
 ## API Version
