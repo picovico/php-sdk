@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__."/lib3.php";
+require __DIR__."/Lib3.php";
 use \Picovico\Lib3 as Picovico;
 
 # initialize and authenticate
