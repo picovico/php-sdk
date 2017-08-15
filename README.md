@@ -18,7 +18,7 @@ Picovico PHP-SDK is available on [Packagist](https://packagist.org/packages/pico
 ```
 {
     "require": {
-        "picovico/php-sdk": "3.0"
+        "picovico/php-sdk": "^3.0"
     }
 }
 ```
